@@ -1,8 +1,8 @@
 
-package test048;
+package Ludo;
 
 import javafx.scene.paint.Color;
-import static test048.Test048.board;
+import static Ludo.Main.board;
 
 public class Board {
     public static void initial(){
@@ -29,17 +29,17 @@ public class Board {
                 board[i][j] = new Cell(Color.ALICEBLUE,Color.BLACK);
                 }
                 if(i==1&&j==13||i==4&&j == 13||i==1&&j==10||i==4&&j==10){
-                    board[i][j].setCoin(new Coin(Type.YELLOW,0));
+                    board[i][j].setCoin(new Coin(Type.YELLOW));
 
                 }
                 if(i==10&&j==10||i==13&&i == j||i==10&&j==13||i==13&&j==10){
-                     board[i][j].setCoin(new Coin(Type.GREEN,0));
+                     board[i][j].setCoin(new Coin(Type.GREEN));
 
                 }if(i==1&&j==1||i==4&&i == j||i==1&&j==4||i==4&&j==1){
-                     board[i][j].setCoin(new Coin(Type.BLUE,0));
+                     board[i][j].setCoin(new Coin(Type.BLUE));
 
                 }if(i==10&&j==1||i==10&&j==4||i==13&&j==4||i==13&&j==1){
-                      board[i][j].setCoin(new Coin(Type.RED,0));
+                      board[i][j].setCoin(new Coin(Type.RED));
                 }
             }
         }

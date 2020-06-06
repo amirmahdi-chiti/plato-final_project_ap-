@@ -1,4 +1,4 @@
-package test048;
+package Ludo;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,14 +8,12 @@ import javafx.scene.paint.ImagePattern;
 
 public class Coin {
 
-    static double redius = 30;
     Type type;
     ImagePattern image;
      private int number;
      private int row;
      private boolean current;
-    public Coin(Type type,int num) {
-        setNumber(num);
+    public Coin(Type type) {
         number = -6;
         current = false;
         FileInputStream red = null;

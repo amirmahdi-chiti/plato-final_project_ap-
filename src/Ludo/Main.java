@@ -1,36 +1,26 @@
-package test048;
+package Ludo;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.AccessibleAttribute;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-public class Test048 extends Application {
-    static Cell[][] board = new Cell[15][15];
+public class Main extends Application {
+    public static Cell[][] board = new Cell[15][15];
     StackPane stackPane;
     Stage stage;
     BorderPane borderPane;
     GridPane gridPane;
+    static Type turn = Type.BLUE;
     static Color colorBackground = Color.ALICEBLUE;
     public static void main(String[] args) {
         Board.initial();
@@ -42,7 +32,11 @@ public class Test048 extends Application {
 
             @Override
             public void handle(MouseEvent event) {
+                if(board[i][j].getCoin()!= null&&board[i][j].getCoin().type.equals(turn)){
+                    
                 Move.move(i, j);
+                }
+                
             }
         };
         return event;

@@ -1,5 +1,5 @@
 
-package test048;
+package Ludo;
 
 
 public class Path {

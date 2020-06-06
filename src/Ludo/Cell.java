@@ -1,4 +1,4 @@
-package test048;
+package Ludo;
 
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -21,7 +21,7 @@ public class Cell extends Rectangle {
     public void setCoin(Coin coin) {
         if (coin == null) {
             this.coin = coin;
-            this.setFill(Test048.colorBackground);
+            this.setFill(Main.colorBackground);
 
         } else {
             this.coin = coin;

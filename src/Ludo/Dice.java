@@ -1,5 +1,5 @@
 
-package test048;
+package Ludo;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,6 +20,7 @@ public class Dice {
     FileInputStream dice = null;
     static int num;
     Rectangle rectangle;
+    private static  boolean enable;
     public Dice() {
         try{
             
@@ -39,6 +40,7 @@ public class Dice {
         
     }
     public int  createRandom(){
+        
         try{
             one = new FileInputStream("image\\1.png");
             two = new FileInputStream("image\\2.png");
@@ -49,6 +51,7 @@ public class Dice {
         }catch(FileNotFoundException e){
             e.printStackTrace();
         }
+        
     
             num = rd.nextInt(6)+1;
             System.out.println(num);
@@ -67,6 +70,14 @@ public class Dice {
             rectangle.setFill(new ImagePattern(new Image(six)));
         }
         return num;
+    }
+
+    public static  boolean isEnable() {
+        return enable;
+    }
+
+    public static void setEnable(boolean enable) {
+        enable = enable;
     }
     
 }   
