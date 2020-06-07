@@ -20,7 +20,7 @@ public class Dice {
     FileInputStream dice = null;
     static int num;
     Rectangle rectangle;
-    private static  boolean enable;
+     static  boolean enable = true;
     public Dice() {
         try{
             
@@ -51,10 +51,12 @@ public class Dice {
         }catch(FileNotFoundException e){
             e.printStackTrace();
         }
-        
-    
+        System.out.println("enable = "+ enable);
+        System.out.println("*****************");
+        if(enable){
             num = rd.nextInt(6)+1;
             System.out.println(num);
+           // Move.changeTurn(Main.turn);
         if(num==1){
             rectangle.setFill(new ImagePattern(new Image(one)));
         }
@@ -69,16 +71,12 @@ public class Dice {
         }if(num==6){
             rectangle.setFill(new ImagePattern(new Image(six)));
         }
+        }
+        enable = false;
         return num;
     }
 
-    public static  boolean isEnable() {
-        return enable;
-    }
-
-    public static void setEnable(boolean enable) {
-        enable = enable;
-    }
+   
     
 }   
 

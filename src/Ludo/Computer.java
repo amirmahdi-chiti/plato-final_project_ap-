@@ -9,7 +9,7 @@ public class Computer {
         
         for(int i = 0;i<board.length;i++){
             for(int j = 0 ;j< board.length;j++){
-                if(board[i][j].getCoin().type.equals(type)){
+                if(board[i][j].getCoin()!=null &&board[i][j].getCoin().type.equals(type)){
                     if(Move.move(i, j)){
                         return true;
                     }

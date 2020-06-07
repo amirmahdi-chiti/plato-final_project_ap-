@@ -1,15 +1,12 @@
 package Ludo;
 
-
 import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -33,8 +30,21 @@ public class Main extends Application {
             @Override
             public void handle(MouseEvent event) {
                 if(board[i][j].getCoin()!= null&&board[i][j].getCoin().type.equals(turn)){
-                    
-                Move.move(i, j);
+                    Move.move(i, j);
+                    Logic.finish();
+                    while(!turn.equals(Type.BLUE)){
+                    new Computer().play(turn);
+                       /* try{
+                             try {
+                            TimeUnit.SECONDS.sleep(1);
+                            } catch (InterruptedException ex) {
+                            }
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                        }*/
+                      Logic.finish();
+                    }
                 }
                 
             }
@@ -52,10 +62,8 @@ public class Main extends Application {
         gridPane = new GridPane();
         borderPane.setCenter(gridPane);
         gridPane.setAlignment(Pos.CENTER);
-        HBox hBox = new HBox(new Dice().createDice());
-        borderPane.setRight(hBox);
-        hBox.setAlignment(Pos.CENTER_RIGHT);
-        hBox.setPadding(new Insets(100, 100, 100, 0));
+        borderPane.setRight(Gui.createRightBox());
+        
 
         for(int i = 0;i<15;i++){
             for(int j = 0;j<15;j++){
@@ -71,5 +79,6 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
     }
+    
 
 }
