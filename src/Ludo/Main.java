@@ -56,7 +56,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
        stage = primaryStage;
-        borderPane = new BorderPane();
+    /*    borderPane = new BorderPane();
        
         stackPane = new StackPane(borderPane);
         gridPane = new GridPane();
@@ -73,10 +73,11 @@ public class Main extends Application {
                 gridPane.add(board[i][j],i,j);
             }
         }
-        Scene scene = new Scene(stackPane);
+        Scene scene = new Scene(stackPane);*/
         stage.setFullScreen(true);
         stage.setResizable(false);
-        stage.setScene(scene);
+        //stage.setScene(scene);
+        stage.setScene(new Tic_Tac_Toe.Main().sceneBuider());
         stage.show();
     }
     
