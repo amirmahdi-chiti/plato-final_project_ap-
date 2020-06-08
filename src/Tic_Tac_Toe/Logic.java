@@ -16,8 +16,11 @@ import javafx.scene.paint.ImagePattern;
             if (b[row][0].nut != null && b[row][0].nut == b[row][1].nut
                     && b[row][1].nut == b[row][2].nut) {
                 if (b[row][0].nut.equals(Nut.X)) {
+                    Main.text.setText("Player 1 is winner");
                     return +1;
                 } else if (b[row][0].nut.equals(Nut.O)) {
+                    Main.text.setText("Player 2 is winner");
+
                     return -1;
                 }
             }
@@ -27,9 +30,11 @@ import javafx.scene.paint.ImagePattern;
         for (int col = 0; col < 3; col++) {
             if (b[0][col].nut != null && b[0][col].nut == b[1][col].nut
                     && b[1][col].nut == b[2][col].nut) {
-                if (b[0][col].nut == player) {
+                if (b[0][col].nut == Nut.X) {
+                    Main.text.setText("Player 1 is winner");
                     return +1;
-                } else if (b[0][col].nut == opponent) {
+                } else if (b[0][col].nut == Nut.O) {
+                    Main.text.setText("Player 2 is winner");
                     return -1;
                 }
             }
@@ -37,29 +42,35 @@ import javafx.scene.paint.ImagePattern;
 
         // Checking for Diagonals for X or O victory. 
         if (b[0][0].nut != null && b[0][0].nut == b[1][1].nut && b[1][1].nut == b[2][2].nut) {
-            if (b[0][0].nut == player) {
+            if (b[0][0].nut == Nut.X) {
+                Main.text.setText("Player 1 is winner");
                 return +1;
-            } else if (b[0][0].nut == opponent) {
+            } else if (b[0][0].nut == Nut.O) {
+                Main.text.setText("Player 2 is winner");
                 return -1;
             }
         }
 
         if (b[1][1].nut != null && b[0][2].nut == b[1][1].nut && b[1][1].nut == b[2][0].nut) {
-            if (b[0][2].nut == player) {
+            if (b[0][2].nut == Nut.X) {
+                Main.text.setText("Player 1 is winner");
                 return +1;
-            } else if (b[0][2].nut == opponent) {
+            } else if (b[0][2].nut == Nut.O) {
+                Main.text.setText("Player 2 is winner");
                 return -1;
             }
         }
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (b[i][j].nut == null) {
+                    
                     return 2;
                 }
             }
 
         }
-        // Else if none of them have won then return 0 
+        // Else if none of them have won then return 0
+        Main.text.setText("DRAW");
         return 0;
     }
     public static void click(Cell cell){
@@ -84,7 +95,6 @@ import javafx.scene.paint.ImagePattern;
 
                 }
             }
-            System.out.println(Logic.isFinish());
         
     }
 }

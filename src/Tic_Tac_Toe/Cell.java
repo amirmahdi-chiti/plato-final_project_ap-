@@ -18,8 +18,16 @@ class Cell extends Rectangle {
         setFill(Color.ALICEBLUE);
         setOnMousePressed((event) -> {
             Logic.click(this);
+            if(Logic.isFinish()==2){
             new Computer().play();
+            }
+            
         });
+    }
+
+    @Override
+    public String toString() {
+        return  "" + nut ;
     }
 
     
