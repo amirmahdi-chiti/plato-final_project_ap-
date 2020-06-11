@@ -73,7 +73,8 @@ import javafx.scene.paint.ImagePattern;
         Main.text.setText("DRAW");
         return 0;
     }
-    public static void click(Cell cell){
+    public static void click(Cell cell,Nut nut){
+        if(nut==null)nut = Main.turn;
         FileInputStream o = null;
             FileInputStream x = null;
             try {
@@ -84,17 +85,78 @@ import javafx.scene.paint.ImagePattern;
             }
             if (cell.nut == null) {
                 
-                if (Main.turn.equals(Nut.O)) {
+                if (nut.equals(Nut.O)) {
                     cell.setFill(new ImagePattern(new Image(o)));
-                    cell.nut = Main.turn;
+                    cell.nut = nut;
                     Main.turn = Nut.X;
                 } else {
                     cell.setFill(new ImagePattern(new Image(x)));
-                    cell.nut = Main.turn;
+                    cell.nut = nut;
                      Main.turn = Nut.O;
 
                 }
             }
         
     }
+          /**
+         * Determine if the cells are all occupied
+         */
+        public static boolean isFull(char[][] cell) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (cell[i][j] == ' ') {
+                        return false; // At least one cell is not filled
+                    }
+                }
+            }
+            // All cells are filled
+            return true;
+        }
+
+        /**
+         * Determine if the player with the specified token wins
+         */
+        public static  boolean isWon(char token,char[][] cell) {
+            // Check all rows
+            for (int i = 0; i < 3; i++) {
+                if ((cell[i][0] == token)
+                        && (cell[i][1] == token)
+                        && (cell[i][2] == token)) {
+                    return true;
+                }
+            }
+
+            /**
+             * Check all columns
+             */
+            for (int j = 0; j < 3; j++) {
+                if ((cell[0][j] == token)
+                        && (cell[1][j] == token)
+                        && (cell[2][j] == token)) {
+                    return true;
+                }
+            }
+
+            /**
+             * Check major diagonal
+             */
+            if ((cell[0][0] == token)
+                    && (cell[1][1] == token)
+                    && (cell[2][2] == token)) {
+                return true;
+            }
+
+            /**
+             * Check subdiagonal
+             */
+            if ((cell[0][2] == token)
+                    && (cell[1][1] == token)
+                    && (cell[2][0] == token)) {
+                return true;
+            }
+            /**
+             * All checked, but no winner
+             */
+            return false;
+        }
 }

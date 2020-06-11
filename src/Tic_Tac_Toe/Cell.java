@@ -17,7 +17,7 @@ class Cell extends Rectangle {
         setStroke(Color.BLACK);
         setFill(Color.ALICEBLUE);
         setOnMousePressed((event) -> {
-            Logic.click(this);
+            Logic.click(this,null);
             if(Logic.isFinish()==2){
             new Computer().play();
             }

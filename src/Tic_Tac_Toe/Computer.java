@@ -213,7 +213,7 @@ static Move findBestMove(char board[][])
        
         Move bestMove = findBestMove(b);
         
-        Logic.click(Main.Board[bestMove.row][bestMove.col]);
+        Logic.click(Main.Board[bestMove.row][bestMove.col],null);
     }
     
 }
