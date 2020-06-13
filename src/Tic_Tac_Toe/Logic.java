@@ -11,7 +11,7 @@ import javafx.scene.paint.ImagePattern;
  class Logic {
 
     public static int isFinish() {
-        Cell[][] b = Main.Board;
+        Main.Cell[][] b = Main.Board;
         for (int row = 0; row < 3; row++) {
             if (b[row][0].nut != null && b[row][0].nut == b[row][1].nut
                     && b[row][1].nut == b[row][2].nut) {
@@ -73,8 +73,18 @@ import javafx.scene.paint.ImagePattern;
         Main.text.setText("DRAW");
         return 0;
     }
-    public static void click(Cell cell,Nut nut){
-        if(nut==null)nut = Main.turn;
+    public static void click(Main.Cell cell,Main m){
+        if (m!=null&&cell.nut==null && m.getMyTurn()) {
+                paint(cell, m.getMyToken());
+                m.setMyTurn(false);
+                m.setRowSelected(cell.getRow());
+                m.setColumnSelected(cell.getColumn());
+                m.lblStatus.setText("Waiting for the other player to move");
+                m.setWaiting(false); // Just completed a successful move
+            }
+        if(m==null)paint(cell, Main.turn);
+    }
+    public static void paint(Main.Cell cell,Nut nut){
         FileInputStream o = null;
             FileInputStream x = null;
             try {
@@ -83,20 +93,16 @@ import javafx.scene.paint.ImagePattern;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-            if (cell.nut == null) {
                 
+                    cell.nut = nut;
                 if (nut.equals(Nut.O)) {
                     cell.setFill(new ImagePattern(new Image(o)));
-                    cell.nut = nut;
                     Main.turn = Nut.X;
                 } else {
                     cell.setFill(new ImagePattern(new Image(x)));
-                    cell.nut = nut;
                      Main.turn = Nut.O;
 
                 }
-            }
-        
     }
           /**
          * Determine if the cells are all occupied

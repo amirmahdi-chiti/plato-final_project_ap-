@@ -56,27 +56,27 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
        stage = primaryStage;
-//        borderPane = new BorderPane();
-//       
-//        stackPane = new StackPane(borderPane);
-//        gridPane = new GridPane();
-//        borderPane.setCenter(gridPane);
-//        gridPane.setAlignment(Pos.CENTER);
-//        borderPane.setRight(Gui.createRightBox());
-//        
-//
-//        for(int i = 0;i<15;i++){
-//            for(int j = 0;j<15;j++){
-//                board[i][j].setOnMousePressed(eventHandle(i, j));
-//                 
-//                
-//                gridPane.add(board[i][j],i,j);
-//            }
-//        }
-//        Scene scene = new Scene(stackPane);
+       /* borderPane = new BorderPane();
+       
+        stackPane = new StackPane(borderPane);
+        gridPane = new GridPane();
+        borderPane.setCenter(gridPane);
+        gridPane.setAlignment(Pos.CENTER);
+        borderPane.setRight(Gui.createRightBox());
+        
+
+        for(int i = 0;i<15;i++){
+            for(int j = 0;j<15;j++){
+                board[i][j].setOnMousePressed(eventHandle(i, j));
+                 
+                
+                gridPane.add(board[i][j],i,j);
+            }
+        }
+        Scene scene = new Scene(stackPane);*/
         stage.setFullScreen(true);
         stage.setResizable(false);
-     //   stage.setScene(scene);
+       // stage.setScene(scene);
         stage.setScene(new Tic_Tac_Toe.Main().sceneBuider());
         stage.show();
     }
