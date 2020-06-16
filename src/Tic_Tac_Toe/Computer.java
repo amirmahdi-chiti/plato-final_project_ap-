@@ -72,7 +72,7 @@ static int evaluate(char b[][])
 // This is the minimax function. It considers all 
 // the possible ways the game can go and returns 
 // the value of the board 
-static int minimax(char board[][],  
+  static int minimax(char board[][],  
                     int depth, Boolean isMax) 
 { 
     int score = evaluate(board); 
