@@ -67,9 +67,10 @@ public class SignUp {
         comboBox.setPrefHeight(50);
         Button button1 = new Button("sign up");
         button1.setOnAction((event) -> {
-            boolean bool = new Sql().insert(textField1.getText(), textField2.getText(), (String) comboBox.getValue(), textField4.getText(), passwordField.getText());
-            if(bool)hideText.setText("The Account Was Successfully Created");
-            else hideText.setText("Please enter the information correctly");
+            int check = new Sql().insert(textField1.getText(), textField2.getText(), (String) comboBox.getValue(), textField4.getText(), passwordField.getText());
+            if(check==1)hideText.setText("The Account Was Successfully Created");
+            else if(check==-1)hideText.setText("Please enter the information correctly");
+            else hideText.setText("the username or email is taken, try another");
         });
         button1.setStyle("-fx-background-color: #F66565; ");
         button1.setFont(new Font("arial", 30));

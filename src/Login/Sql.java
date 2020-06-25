@@ -34,9 +34,9 @@ public class Sql {
 //          System.out.println(searchLogin("amirmahd", "chiti"));
     }
 
-    public boolean insert(String username, String email, String question, String answer, String pass) {
-        if(!isValidEmailAddress(email))return false;
-        if(!checkCreate(email, pass, username))return false;
+    public int insert(String username, String email, String question, String answer, String pass) {
+        if(!isValidEmailAddress(email))return -1; // -1 for incorrect information , 0 for duplicated information , 1 for correct information
+        if(checkCreate(email, pass, username)!=1)return checkCreate(email, pass, username);
         int rowsInserted = -1;
         PreparedStatement statement = null;
         try {
@@ -48,14 +48,14 @@ public class Sql {
             rowsInserted = statement.executeUpdate();
         } catch (SQLException ex) {
             System.out.println("ridiiiiiiiii");
-            return false;
+            return -1;
         }
 
         if (rowsInserted > 0) {
             System.out.println("A new user was inserted successfully!");
-            return true;
+            return 1;
         }
-        return false;
+        return -1;
     }
 
     public boolean searchLogin(String username, String pass) {
@@ -87,8 +87,8 @@ public class Sql {
        }
        return result;
     }
-    private boolean checkCreate(String email,String pass,String username){
-        if(pass.length()<8)return false;
+    private int  checkCreate(String email,String pass,String username){
+        if(pass.length()<8)return -1;
         String sql = "SELECT * FROM [dbo].[user2]";
 
         Statement statement = null;
@@ -98,17 +98,17 @@ public class Sql {
             result = statement.executeQuery(sql);
             while (result.next()) {
                  if(username.equals(result.getString("username"))){
-                     return false;
+                     return 0;
                  }
                  if(email.equals(result.getString("email"))){
-                     return false;
+                     return 0;
                  }
             }
         } catch (SQLException ex) {
             System.out.println("oops");
         }
         
-        return true;
+        return 1;
     }
     public String[] recover(String email, String question, String answer){
         String sql = "SELECT * FROM [dbo].[user2]";
