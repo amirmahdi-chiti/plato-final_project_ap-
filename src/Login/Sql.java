@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.internet.AddressException;
@@ -136,5 +138,44 @@ public class Sql {
         }
         
         return str;
+    }
+    public int  saveMessage(String text, String sender,String reciver){
+         int rowsInserted = -1;
+        PreparedStatement statement = null;
+        try {
+            String sql = "INSERT INTO private(sender,receiver,message) VALUES " + "('" + sender + "','" + reciver + "','"
+                    + text + "')";
+
+            statement = conn.prepareStatement(sql);
+
+            rowsInserted = statement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return -1;
+        }
+
+        if (rowsInserted > 0) {
+            System.out.println(" massage saved!");
+            return 1;
+        }
+        return -1;
+        
+    }
+    public ArrayList<String> getMessage(String sender,String receiver){
+        ArrayList<String> arrayList = new ArrayList<String>();
+       String sql = "SELECT * FROM private Where sender = '"+ sender + "' and receiver = '" + receiver +"'";
+       
+       Statement statement = null;
+        ResultSet result = null;
+        try {
+            statement = conn.createStatement();
+            result = statement.executeQuery(sql);
+            while (result.next()) {
+                arrayList.add(result.getString("sender")+": "+result.getString("message"));
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return arrayList;
     }
 }

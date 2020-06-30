@@ -6,7 +6,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
@@ -14,6 +18,7 @@ import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -24,7 +29,11 @@ import sun.security.util.Password;
 public class SignUp {
 
     public static Pane createPane() {
+        BorderPane borderPane = new BorderPane();
         GridPane gridPane = new GridPane();
+        borderPane.setCenter(gridPane);
+        MenuBar menuBar = new MenuBar(createMenuBar());
+        borderPane.setTop(menuBar);
         Image image = null;
         try {
             image = new Image(new FileInputStream("image\\signup.png"));
@@ -90,6 +99,28 @@ public class SignUp {
         gridPane.add(textField4, 1, 4);
         gridPane.add(button1, 1, 5);
         gridPane.add(hideText, 1, 6);
-        return gridPane;
+        return borderPane;
+    }
+
+    private static Menu createMenuBar() {
+         Menu fileMenu = new Menu("File");
+        MenuItem menuItem1 = new MenuItem("New ...");
+        menuItem1.setOnAction((event) -> {
+//            try {
+//                /original.setScene(createScene1());
+//            } catch (FileNotFoundException ex) {
+//                System.out.println("cannot");
+//            }
+        });
+        fileMenu.getItems().add(menuItem1);
+        fileMenu.getItems().add(new MenuItem("Open..."));
+        fileMenu.getItems().add(new MenuItem("Setting..."));
+        fileMenu.getItems().add(new SeparatorMenuItem());
+        MenuItem menuItem = new MenuItem("Exit");
+        menuItem.setOnAction((event) -> {
+            //original.close();
+        });
+        fileMenu.getItems().add(menuItem);
+        return fileMenu;
     }
 }

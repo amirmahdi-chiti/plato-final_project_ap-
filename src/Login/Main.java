@@ -1,7 +1,10 @@
 package Login;
 
+import Chat.ChatClient;
+import Chat.messagePane;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -28,9 +31,18 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     Scene scene;
+    private ChatClient client;
+    private Stage originalStage;
+    @Override
+    public void init() throws Exception {
+        super.init(); //To change body of generated methods, choose Tools | Templates.
+        this.client = new ChatClient("localhost", Server.ServerMain.PORT);
+        client.connect();
+    }
+    
     @Override
     public void start(Stage stage) {
-
+        originalStage = stage;
         Text text1 = new Text("Username");
         text1.setFill(Color.WHITE);
         text1.setStyle("-fx-font: 24 arial;");
@@ -54,8 +66,17 @@ public class Main extends Application {
         button1.setFont(new Font("arial", 20));
         button1.setTextFill(Color.WHITE);
         button1.setOnAction((event) -> {
-            boolean bool = new Sql().searchLogin(textField1.getText(), textField2.getText());
-            System.out.println(bool);
+            try {
+                if (client.login(textField1.getText(), textField2.getText())) {
+                    System.out.println("wellcome to chat");
+                    scene.setRoot(new messagePane(client,textField1.getText()).sceneChat());
+                }
+                else{
+                    System.out.println("im sory ...");
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         });
         BorderPane borderPane = new BorderPane();
         Image image = null;
@@ -107,10 +128,20 @@ public class Main extends Application {
         gridPane1.add(text3, 0, 1);
         gridPane1.add(button, 0, 2);
          scene = new Scene(borderPane);
-        stage.setTitle("Grid Pane Example");
-        stage.setFullScreen(true);
-        stage.show();
-        stage.setScene(scene);
+        originalStage.setTitle("Grid Pane Example");
+        originalStage.setFullScreen(true);
+        originalStage.setScene(scene);
+        stage.setOnCloseRequest((event) -> {
+            System.out.println("hehehhehe");
+            try {
+                client.logoff();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            System.out.println("hehehhehe2");
+
+        });
+        originalStage.show();
     }
 
     public static void main(String args[]) {
