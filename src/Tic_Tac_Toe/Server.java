@@ -18,23 +18,16 @@ public class Server implements TicTacToeConstants{
             try {
                 // Create a server socket
                 ServerSocket serverSocket = new ServerSocket(8000);
-                System.out.println(new Date()
-                        + ": Server started at socket 8000\n");
+                
 
                 // Ready to create a session for every two players
                 while (true) {
-                    System.out.println(new Date()
-                            + ": Wait for players to join session " + sessionNo + '\n');
+                    
 
                     // Connect to player 1
                     Socket player1 = serverSocket.accept();
 
-                    Platform.runLater(() -> {
-                        System.out.println(new Date() + ": Player 1 joined session "
-                                + sessionNo + '\n');
-                        System.out.println("Player 1's IP address"
-                                + player1.getInetAddress().getHostAddress() + '\n');
-                    });
+                    
 
                     // Notify that the player is Player 1
                     new DataOutputStream(
@@ -43,21 +36,14 @@ public class Server implements TicTacToeConstants{
                     // Connect to player 2
                     Socket player2 = serverSocket.accept();
 
-                    Platform.runLater(() -> {
-                        System.out.println(new Date()
-                                + ": Player 2 joined session " + sessionNo + '\n');
-                        System.out.println("Player 2's IP address"
-                                + player2.getInetAddress().getHostAddress() + '\n');
-                    });
+                   
 
                     // Notify that the player is Player 2
                     new DataOutputStream(
                             player2.getOutputStream()).writeInt(PLAYER2);
 
                     // Display this session and increment session number
-                              System.out.println(new Date()
-                                    + ": Start a thread for session " + sessionNo++ + '\n');
-
+                    
                     // Launch a new thread for this session of two players
                     new Thread(new HandleASession(player1, player2)).start();
                 }

@@ -143,7 +143,7 @@ public class Sql {
          int rowsInserted = -1;
         PreparedStatement statement = null;
         try {
-            String sql = "INSERT INTO private(sender,receiver,message) VALUES " + "('" + sender + "','" + reciver + "','"
+            String sql = "INSERT INTO private2(sender,receiver,message) VALUES " + "('" + sender + "','" + reciver + "','"
                     + text + "')";
 
             statement = conn.prepareStatement(sql);
@@ -163,15 +163,55 @@ public class Sql {
     }
     public ArrayList<String> getMessage(String sender,String receiver){
         ArrayList<String> arrayList = new ArrayList<String>();
-       String sql = "SELECT * FROM private Where sender = '"+ sender + "' and receiver = '" + receiver +"'";
-       
+       String sql = "SELECT * FROM private2 Where (sender = '"+ sender + "' and receiver = '" + receiver +"')or (sender = '"+ receiver + "' and receiver = '" + sender +"') ORDER BY ID";
+
        Statement statement = null;
         ResultSet result = null;
         try {
             statement = conn.createStatement();
             result = statement.executeQuery(sql);
             while (result.next()) {
-                arrayList.add(result.getString("sender")+": "+result.getString("message"));
+                sender = result.getString("sender").trim();
+                arrayList.add(sender+": "+result.getString("message"));
+            }
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return arrayList;
+    }
+    public int  addcontact(String me, String contact){
+         int rowsInserted = -1;
+        PreparedStatement statement = null;
+        try {
+            String sql = "INSERT INTO contact(me,contact) VALUES " + "('" + me + "','" + contact + 
+                     "')";
+
+            statement = conn.prepareStatement(sql);
+
+            rowsInserted = statement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return -1;
+        }
+
+        if (rowsInserted > 0) {
+            System.out.println(" massage saved!");
+            return 1;
+        }
+        return -1;
+        
+    }
+    public ArrayList<String> getContact(String me){
+        ArrayList<String> arrayList = new ArrayList<String>();
+       String sql = "SELECT * FROM contact Where me = '"+ me+"'";
+
+       Statement statement = null;
+        ResultSet result = null;
+        try {
+            statement = conn.createStatement();
+            result = statement.executeQuery(sql);
+            while (result.next()) {
+                arrayList.add(result.getString("contact"));
             }
         }catch(SQLException e){
             e.printStackTrace();
