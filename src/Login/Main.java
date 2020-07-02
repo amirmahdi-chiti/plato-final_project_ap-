@@ -30,7 +30,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    Scene scene;
+    static Scene scene;
     private ChatClient client;
     private Stage originalStage;
     @Override
@@ -69,7 +69,8 @@ public class Main extends Application {
             try {
                 if (client.login(textField1.getText(), textField2.getText())) {
                     System.out.println("wellcome to chat");
-                    scene.setRoot(new messagePane(client,textField1.getText()).sceneChat());
+                    //scene.setRoot(new messagePane(client,textField1.getText()).sceneChat());
+                    scene.setRoot(new GamePage(client,textField1.getText()).createGamePage());
                 }
                 else{
                     System.out.println("im sory ...");

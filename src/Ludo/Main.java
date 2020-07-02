@@ -7,11 +7,12 @@ import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class Main {
     public static Cell[][] board = new Cell[15][15];
     StackPane stackPane;
     Stage stage;
@@ -20,8 +21,6 @@ public class Main extends Application {
     static Type turn = Type.BLUE;
     static Color colorBackground = Color.ALICEBLUE;
     public static void main(String[] args) {
-        Board.initial();
-        launch(args);
     }
     private EventHandler<MouseEvent> eventHandle(int i, int j) {
 
@@ -53,10 +52,10 @@ public class Main extends Application {
 
     }
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-       stage = primaryStage;
-       /* borderPane = new BorderPane();
+    public Pane start() throws Exception {
+       
+        borderPane = new BorderPane();
+        Board.initial();
        
         stackPane = new StackPane(borderPane);
         gridPane = new GridPane();
@@ -73,12 +72,13 @@ public class Main extends Application {
                 gridPane.add(board[i][j],i,j);
             }
         }
-        Scene scene = new Scene(stackPane);*/
-        stage.setFullScreen(true);
-        stage.setResizable(false);
-       // stage.setScene(scene);
-        stage.setScene(new Tic_Tac_Toe.Main().sceneBuider());
-        stage.show();
+        return stackPane;
+ //       Scene scene = new Scene(stackPane);
+//        stage.setFullScreen(true);
+//        stage.setResizable(false);
+//       // stage.setScene(scene);
+//        stage.setScene(new Tic_Tac_Toe.Main().sceneBuider());
+//        stage.show();
     }
     
 

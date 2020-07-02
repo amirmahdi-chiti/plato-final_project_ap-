@@ -3,19 +3,29 @@ package Tic_Tac_Toe;
 import static Tic_Tac_Toe.TicTacToeConstants.PLAYER1;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -25,6 +35,7 @@ public class Main implements TicTacToeConstants {
     static Cell[][] Board = new Cell[3][3];
     Cell[][] cells = new Cell[3][3];
     static Text text;
+    String me;
     private boolean myTurn = false;
     // Indicate the token for the player
     private Nut myToken = null;
@@ -32,7 +43,7 @@ public class Main implements TicTacToeConstants {
     // Indicate selected row and column by the current move
     private int rowSelected;
     private int columnSelected;
-
+    public boolean computer = true;
     // Input and output streams from/to server
     private DataInputStream fromServer;
     private DataOutputStream toServer;
@@ -50,13 +61,16 @@ public class Main implements TicTacToeConstants {
     // Host name or ip
     private String host = "localhost";
 
-    public Main() {
+    public Main(boolean Computer,String login) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 Board[i][j] = new Cell(i, j);
                 cells[i][j] = new Cell(i, j);
             }
         }
+        this.computer = computer;
+        this.me = login;
+        Logic.me = login;
     }
 
     public void setMyTurn(boolean myTurn) {
@@ -111,25 +125,39 @@ public class Main implements TicTacToeConstants {
         return columnSelected;
     }
 
-    public Scene sceneBuider() {
+    public Pane sceneBuider() throws FileNotFoundException {
         BorderPane borderPane = new BorderPane();
         GridPane gridPane = new GridPane();
         HBox hBox = new HBox();
         borderPane.setTop(hBox);
         text = new Text();
+        text.setFill(Color.WHITE);
+        text.setFont(new Font(45));
+        lblStatus.setTextFill(Color.WHITE);
+        lblTitle.setTextFill(Color.WHITE);
+        lblStatus.setFont(new Font(45));
+        lblTitle.setFont(new Font(45));
         hBox.getChildren().addAll(lblStatus, lblTitle, text);
+        hBox.setPadding(new Insets(70));
         hBox.setAlignment(Pos.CENTER);
         gridPane.setAlignment(Pos.CENTER);
         for (int i = 0; i < Board.length; i++) {
             for (int j = 0; j < Board.length; j++) {
-                //gridPane.add(Board[i][j], i, j);
+                if(computer){
+                gridPane.add(Board[i][j], i, j);
+                }else{
                 gridPane.add(cells[i][j], i, j);
+                }
             }
         }
         borderPane.setCenter(gridPane);
-        Scene scene = new Scene(borderPane);
-        start();
-        return scene;
+        
+        Image image = new Image(new FileInputStream("image\\tictactoeBack.png"));
+        borderPane.setBackground(new Background(new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
+        if (!computer) {
+            start();
+        }
+        return borderPane;
     }
 
     public void start() {
@@ -299,11 +327,16 @@ public class Main implements TicTacToeConstants {
             setStroke(Color.BLACK);
             setFill(Color.ALICEBLUE);
             setOnMousePressed((event) -> {
-                Logic.click(this,Main.this);
-             /*   if(Logic.isFinish()==2){
-            new Computer().play();
-            }*/
-
+                if(!computer){
+                Logic.click(this, Main.this);
+                }
+                else
+                    Logic.click(this, null);
+                if (computer) {
+                    if (Logic.isFinish() == 2) {
+                        new Computer().play();
+                    }
+                }
             });
         }
 
@@ -314,10 +347,10 @@ public class Main implements TicTacToeConstants {
 
     }
 
+}
+
+enum Nut {
+    O,
+    X
 
 }
-    enum Nut {
-        O,
-        X
-
-    }
