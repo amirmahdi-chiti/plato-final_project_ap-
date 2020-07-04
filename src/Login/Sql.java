@@ -37,8 +37,12 @@ public class Sql {
     }
 
     public int insert(String username, String email, String question, String answer, String pass) {
-        if(!isValidEmailAddress(email))return -1; // -1 for incorrect information , 0 for duplicated information , 1 for correct information
-        if(checkCreate(email, pass, username)!=1)return checkCreate(email, pass, username);
+        if (!isValidEmailAddress(email)) {
+            return -1; // -1 for incorrect information , 0 for duplicated information , 1 for correct information
+        }
+        if (checkCreate(email, pass, username) != 1) {
+            return checkCreate(email, pass, username);
+        }
         int rowsInserted = -1;
         PreparedStatement statement = null;
         try {
@@ -69,28 +73,32 @@ public class Sql {
             statement = conn.createStatement();
             result = statement.executeQuery(sql);
             while (result.next()) {
-                 if(username.equals(result.getString("username"))&&pass.equals(result.getString("password"))){
-                     return true;
-                 }
+                if (username.equals(result.getString("username")) && pass.equals(result.getString("password"))) {
+                    return true;
+                }
             }
         } catch (SQLException ex) {
             System.out.println("oops");
         }
-        
+
         return false;
     }
-    private  boolean isValidEmailAddress(String email) {
-       boolean result = true;
-       try {
-          InternetAddress emailAddr = new InternetAddress(email);
-          emailAddr.validate();
-       } catch (AddressException ex) {
-          result = false;
-       }
-       return result;
+
+    private boolean isValidEmailAddress(String email) {
+        boolean result = true;
+        try {
+            InternetAddress emailAddr = new InternetAddress(email);
+            emailAddr.validate();
+        } catch (AddressException ex) {
+            result = false;
+        }
+        return result;
     }
-    private int  checkCreate(String email,String pass,String username){
-        if(pass.length()<8)return -1;
+
+    private int checkCreate(String email, String pass, String username) {
+        if (pass.length() < 8) {
+            return -1;
+        }
         String sql = "SELECT * FROM [dbo].[user2]";
 
         Statement statement = null;
@@ -99,22 +107,23 @@ public class Sql {
             statement = conn.createStatement();
             result = statement.executeQuery(sql);
             while (result.next()) {
-                 if(username.equals(result.getString("username"))){
-                     return 0;
-                 }
-                 if(email.equals(result.getString("email"))){
-                     return 0;
-                 }
+                if (username.equals(result.getString("username"))) {
+                    return 0;
+                }
+                if (email.equals(result.getString("email"))) {
+                    return 0;
+                }
             }
         } catch (SQLException ex) {
             System.out.println("oops");
         }
-        
+
         return 1;
     }
-    public String[] recover(String email, String question, String answer){
+
+    public String[] recover(String email, String question, String answer) {
         String sql = "SELECT * FROM [dbo].[user2]";
-        String [] str = new String[2];
+        String[] str = new String[2];
         str[0] = "0";
         str[1] = "0";
         Statement statement = null;
@@ -126,21 +135,22 @@ public class Sql {
                 System.out.println(email.equals(result.getString("email")));
                 System.out.println(question.equals(result.getNCharacterStream("selectedQuestion")));
                 System.out.println(answer.equals(result.getString("answer")));
-                
-                 if(email.equals(result.getString("email"))&&answer.equals(result.getString("answer"))){
-                     str[0]= result.getString("username");
-                     str[1]= result.getString("password");
-                     System.out.println("hasttttttttttttt");
-                 }
+
+                if (email.equals(result.getString("email").trim()) && answer.equals(result.getString("answer").trim())) {
+                    str[0] = result.getString("username");
+                    str[1] = result.getString("password");
+                    System.out.println("hasttttttttttttt");
+                }
             }
         } catch (SQLException ex) {
             System.out.println("oops");
         }
-        
+
         return str;
     }
-    public int  saveMessage(String text, String sender,String reciver){
-         int rowsInserted = -1;
+
+    public int saveMessage(String text, String sender, String reciver) {
+        int rowsInserted = -1;
         PreparedStatement statement = null;
         try {
             String sql = "INSERT INTO private2(sender,receiver,message) VALUES " + "('" + sender + "','" + reciver + "','"
@@ -159,32 +169,34 @@ public class Sql {
             return 1;
         }
         return -1;
-        
-    }
-    public ArrayList<String> getMessage(String sender,String receiver){
-        ArrayList<String> arrayList = new ArrayList<String>();
-       String sql = "SELECT * FROM private2 Where (sender = '"+ sender + "' and receiver = '" + receiver +"')or (sender = '"+ receiver + "' and receiver = '" + sender +"') ORDER BY ID";
 
-       Statement statement = null;
+    }
+
+    public ArrayList<String> getMessage(String sender, String receiver) {
+        ArrayList<String> arrayList = new ArrayList<String>();
+        String sql = "SELECT * FROM private2 Where (sender = '" + sender + "' and receiver = '" + receiver + "')or (sender = '" + receiver + "' and receiver = '" + sender + "') ORDER BY ID";
+
+        Statement statement = null;
         ResultSet result = null;
         try {
             statement = conn.createStatement();
             result = statement.executeQuery(sql);
             while (result.next()) {
                 sender = result.getString("sender").trim();
-                arrayList.add(sender+": "+result.getString("message"));
+                arrayList.add(sender + ": " + result.getString("message"));
             }
-        }catch(SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return arrayList;
     }
-    public int  addcontact(String me, String contact){
-         int rowsInserted = -1;
+
+    public int addcontact(String me, String contact) {
+        int rowsInserted = -1;
         PreparedStatement statement = null;
         try {
-            String sql = "INSERT INTO contact(me,contact) VALUES " + "('" + me + "','" + contact + 
-                     "')";
+            String sql = "INSERT INTO contact(me,contact) VALUES " + "('" + me + "','" + contact
+                    + "')";
 
             statement = conn.prepareStatement(sql);
 
@@ -199,13 +211,14 @@ public class Sql {
             return 1;
         }
         return -1;
-        
-    }
-    public ArrayList<String> getContact(String me){
-        ArrayList<String> arrayList = new ArrayList<String>();
-       String sql = "SELECT * FROM contact Where me = '"+ me+"'";
 
-       Statement statement = null;
+    }
+
+    public ArrayList<String> getContact(String me) {
+        ArrayList<String> arrayList = new ArrayList<String>();
+        String sql = "SELECT * FROM contact Where me = '" + me + "'";
+
+        Statement statement = null;
         ResultSet result = null;
         try {
             statement = conn.createStatement();
@@ -213,9 +226,80 @@ public class Sql {
             while (result.next()) {
                 arrayList.add(result.getString("contact"));
             }
-        }catch(SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return arrayList;
     }
+
+    public int saveRecord(String user1, String user2, String result) {
+        int rowsInserted = -1;
+        PreparedStatement statement = null;
+        try {
+            String sql = "INSERT INTO record3(user1,user2,result) VALUES " + "('" + user1 + "','" + user2 + "','"
+                    + result + "')";
+
+            statement = conn.prepareStatement(sql);
+
+            rowsInserted = statement.executeUpdate();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return -1;
+        }
+
+        if (rowsInserted > 0) {
+            System.out.println(" massage saved!");
+            return 1;
+        }
+        return -1;
+
+    }
+
+    /*    index 0 : win from friend
+          index 1 : draw from friend
+          index 2 : lose whit friend
+          index 3 : win from computer
+          index 4 : draw from computer
+          index 5 : lose whit computer
+     */
+    public int[] getRecord(String user) {
+        int[] array = new int[6];
+        String sql = "SELECT * FROM record3 Where user1 = '" + user + "'";
+
+        Statement statement = null;
+        ResultSet result = null;
+        try {
+            statement = conn.createStatement();
+            result = statement.executeQuery(sql);
+            while (result.next()) {
+                if (!result.getString("user2").trim().equals("computer")) {
+                    if(result.getString("result").trim().equals("draw")){
+                        array[1]++;
+                    }
+                    else if(result.getString("result").trim().equals("win")){
+                        array[0]++;
+                    }
+                    else{
+                        array[2]++;
+                    }
+                }
+                else{
+                    if(result.getString("result").trim().equals("draw")){
+                        array[4]++;
+                    }
+                    else if(result.getString("result").trim().equals("win")){
+                        array[3]++;
+                    }
+                    else{
+                        array[5]++;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return array;
+    }
+
 }

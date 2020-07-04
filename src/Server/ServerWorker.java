@@ -22,12 +22,13 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author khatam
  */
-public class ServerWorker extends Thread{
+public class ServerWorker extends Thread {
 
     private final Server server;
     private final Socket client;
     private OutputStream outPutStram;
     private String login = null;
+
     ServerWorker(Server server, Socket client) {
         this.server = server;
         this.client = client;
@@ -36,7 +37,7 @@ public class ServerWorker extends Thread{
     public String getLogin() {
         return login;
     }
-    
+
     @Override
     public void run() {
         try {
@@ -45,15 +46,16 @@ public class ServerWorker extends Thread{
             ex.printStackTrace();
         }
     }
-    private void  handleActivity() throws IOException{
+
+    private void handleActivity() throws IOException {
         InputStream inputStream = client.getInputStream();
         outPutStram = client.getOutputStream();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
-        while((line = bufferedReader.readLine())!=null){
+        while ((line = bufferedReader.readLine()) != null) {
             String[] split = StringUtils.split(line);
 
-             if (split != null && split.length > 0) {
+            if (split != null && split.length > 0) {
                 String cmd = split[0];
 
                 if (cmd.equals("#LOGOUT#")) {
@@ -69,11 +71,12 @@ public class ServerWorker extends Thread{
                     handleJoin(split);
                 } else if (cmd.equals("#LEAVE#")) {
                     handleLeave(split);
-                
+                } else if (cmd.equals("#GAME#")) {
+                    handleGame(split);
+                }
             }
         }
     }
-}
 
     private void handleLogoff() {
         System.out.println("in handlde logoff method");
@@ -82,7 +85,7 @@ public class ServerWorker extends Thread{
 
         // send other online users current user's status
         String onlineMsg = "offline " + login + "\n";
-        for(ServerWorker worker : workerList) {
+        for (ServerWorker worker : workerList) {
             if (!login.equals(worker.getLogin())) {
                 worker.send(onlineMsg);
             }
@@ -98,59 +101,60 @@ public class ServerWorker extends Thread{
         String username = split[1];
         String pass = split[2];
         System.out.println("in handle login method");
-        if(new Sql().searchLogin(username, pass)){
-            
-                String msg = "ok login\n";
-                outPutStram.write(msg.getBytes());
-                this.login = username;
-                System.out.println("User logged in succesfully: " + login);
+        if (new Sql().searchLogin(username, pass)) {
 
-                List<ServerWorker> workerList = server.getServerWorkerList();
+            String msg = "ok login\n";
+            outPutStram.write(msg.getBytes());
+            this.login = username;
+            System.out.println("User logged in succesfully: " + login);
 
-                // send current user all other online logins
-                for(ServerWorker worker : workerList) {
-                    if (worker.getLogin()!= null) {
-                        if (!login.equals(worker.getLogin())) {
-                            String msg2 = "online " + worker.getLogin() + "\n";
-                            send(msg2);
-                        }
-                    }
-                }
+            List<ServerWorker> workerList = server.getServerWorkerList();
 
-                // send other online users current user's status
-                String onlineMsg = "online " + login + "\n";
-                for(ServerWorker worker : workerList) {
+            // send current user all other online logins
+            for (ServerWorker worker : workerList) {
+                if (worker.getLogin() != null) {
                     if (!login.equals(worker.getLogin())) {
-                        worker.send(onlineMsg);
+                        String msg2 = "online " + worker.getLogin() + "\n";
+                        System.out.println("injaaaaaaaaa " + worker.getLogin());
+                        send(msg2);
                     }
                 }
-            } else {
-                String msg = "error login\n";
-                outPutStram.write(msg.getBytes());
-                System.err.println("Login failed for " + login);
             }
+
+            // send other online users current user's status
+            String onlineMsg = "online " + login + "\n";
+            for (ServerWorker worker : workerList) {
+                if (!login.equals(worker.getLogin())) {
+                    worker.send(onlineMsg);
+                }
+            }
+        } else {
+            String msg = "error login\n";
+            outPutStram.write(msg.getBytes());
+            System.err.println("Login failed for " + login);
         }
+    }
 
     private void send(String msg) {
         if (login != null) {
             try {
                 outPutStram.write(msg.getBytes());
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
     }
-   
+
     // format: "msg" "login" body...
     // format: "msg" "#topic" body...
     private void handleMessage(String[] tokensMsg) {
-         String sendTo = tokensMsg[1];
+        String sendTo = tokensMsg[1];
         String body = tokensMsg[2];
 
         boolean isTopic = sendTo.charAt(0) == '#';
 
         List<ServerWorker> workerList = server.getServerWorkerList();
-        for(ServerWorker worker : workerList) {
+        for (ServerWorker worker : workerList) {
             if (isTopic) {
                 if (worker.isMemberOfTopic(sendTo)) {
                     String outMsg = "msg " + sendTo + ":" + login + " " + body + "\n";
@@ -161,8 +165,8 @@ public class ServerWorker extends Thread{
                     String outMsg = "msg " + login + " " + body + "\n";
 
                     worker.send(outMsg);
-                       new Sql().saveMessage(body, login, sendTo);
-                       System.out.println("in handlemessage method");
+                    new Sql().saveMessage(body, login, sendTo);
+                    System.out.println("in handlemessage method");
 
                 }
             }
@@ -179,5 +183,23 @@ public class ServerWorker extends Thread{
 
     private boolean isMemberOfTopic(String sendTo) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void handleGame(String[] split) {
+         String sendTo = split[1];
+         List<ServerWorker> workerList = server.getServerWorkerList();
+          for (ServerWorker worker : workerList) {
+                
+                if (sendTo.equalsIgnoreCase(worker.getLogin())) {
+                    String outMsg = "game " + login+"\n";
+
+                    worker.send(outMsg);
+                    
+                    System.out.println("in handlegame method");
+
+                }
+            
+        }
+
     }
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class Server extends Thread{
+public class Server extends Thread{
     private ArrayList<ServerWorker> serverWorkerList = new ArrayList<ServerWorker>();
     public Server() {
     }

@@ -1,6 +1,7 @@
 
 package Login;
 import Ludo.Main;
+import SeaBattle.Board1;
 import Chat.ChatClient;
 import Chat.messagePane;
 import java.io.FileInputStream;
@@ -21,6 +22,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
 
 public class GamePage {
@@ -43,12 +45,15 @@ public class GamePage {
         Image image3 = new Image(new FileInputStream("image\\TicTacToe.png"));
         Image image4 = new Image(new FileInputStream("image\\messangerIcon.png"));
         Image image5 = new Image(new FileInputStream("image\\snake.png"));
-
+        Image image6 = new Image(new FileInputStream("image\\seabattleIcon.png"));
+        
         borderPane.setBackground(new Background(new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
         Rectangle tictactoeIcon = new Rectangle(220, 220);
         Rectangle ludoIcon = new Rectangle(220, 220);
         Rectangle messangerIcon = new Rectangle(220, 220);
         Rectangle snakeIcon = new Rectangle(220, 220);
+        Rectangle seabattleIcon = new Rectangle(220, 220);
+        
         messangerIcon.setOnMousePressed((event) -> {
             try {
                 Login.Main.scene.setRoot(new messagePane(client,me).sceneChat());
@@ -65,9 +70,18 @@ public class GamePage {
         });
         tictactoeIcon.setOnMousePressed((event) -> {
             try {
-                Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(true,me).sceneBuider());
+                Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(true,me,null,null).sceneBuider());
             } catch (FileNotFoundException ex) {
                 ex.printStackTrace();
+            }
+        });
+        seabattleIcon.setOnMousePressed((event) -> {
+            try {
+                Board1 board1 = new SeaBattle.Board1();
+                board1.start(new Stage());
+                board1.main(null);
+            } catch (Exception ex) {
+                System.out.println("create seabattle eror...");;
             }
         });
         
@@ -75,12 +89,13 @@ public class GamePage {
         tictactoeIcon.setFill(new ImagePattern(image3));
         messangerIcon.setFill(new ImagePattern(image4));
         snakeIcon.setFill(new ImagePattern(image5));
+        seabattleIcon.setFill(new ImagePattern(image6));
         
         vBox.getChildren().addAll(messangerIcon,snakeIcon);
-        vBox2.getChildren().addAll(tictactoeIcon,ludoIcon);
+        vBox2.getChildren().addAll(tictactoeIcon,ludoIcon,seabattleIcon);
         vBox2.setSpacing(30);
         vBox.setSpacing(30);
-
+        
         vBox.setAlignment(Pos.CENTER);
         vBox2.setAlignment(Pos.CENTER);
         

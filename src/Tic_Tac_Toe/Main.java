@@ -1,5 +1,6 @@
 package Tic_Tac_Toe;
 
+import Login.Sql;
 import static Tic_Tac_Toe.TicTacToeConstants.PLAYER1;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -23,6 +24,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -36,6 +38,8 @@ public class Main implements TicTacToeConstants {
     Cell[][] cells = new Cell[3][3];
     static Text text;
     String me;
+    private String namePlayer1;
+    private String namePlayer2;
     private boolean myTurn = false;
     // Indicate the token for the player
     private Nut myToken = null;
@@ -58,17 +62,30 @@ public class Main implements TicTacToeConstants {
     // Wait for the player to mark a cell
     private boolean waiting = true;
 
+    public String getNamePlayer1() {
+        return namePlayer1;
+    }
+
+    public String getNamePlayer2() {
+        return namePlayer2;
+    }
+
     // Host name or ip
     private String host = "localhost";
 
-    public Main(boolean Computer,String login) {
+    public Main(boolean Computer, String login, String player1, String player2) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 Board[i][j] = new Cell(i, j);
                 cells[i][j] = new Cell(i, j);
             }
         }
-        this.computer = computer;
+
+        this.computer = Computer;
+        if (!computer) {
+            this.namePlayer1 = player1;
+            this.namePlayer2 = player2;
+        }
         this.me = login;
         Logic.me = login;
     }
@@ -128,32 +145,33 @@ public class Main implements TicTacToeConstants {
     public Pane sceneBuider() throws FileNotFoundException {
         BorderPane borderPane = new BorderPane();
         GridPane gridPane = new GridPane();
-        HBox hBox = new HBox();
+        VBox hBox = new VBox();
         borderPane.setTop(hBox);
         text = new Text();
         text.setFill(Color.WHITE);
         text.setFont(new Font(45));
         lblStatus.setTextFill(Color.WHITE);
         lblTitle.setTextFill(Color.WHITE);
-        lblStatus.setFont(new Font(45));
-        lblTitle.setFont(new Font(45));
+        lblStatus.setFont(new Font(30));
+        lblTitle.setFont(new Font(30));
         hBox.getChildren().addAll(lblStatus, lblTitle, text);
-        hBox.setPadding(new Insets(70));
+        hBox.setPadding(new Insets(50, 0, 0, 0));
         hBox.setAlignment(Pos.CENTER);
         gridPane.setAlignment(Pos.CENTER);
         for (int i = 0; i < Board.length; i++) {
             for (int j = 0; j < Board.length; j++) {
-                if(computer){
-                gridPane.add(Board[i][j], i, j);
-                }else{
-                gridPane.add(cells[i][j], i, j);
+                if (computer) {
+                    gridPane.add(Board[i][j], i, j);
+                } else {
+                    gridPane.add(cells[i][j], i, j);
                 }
             }
         }
         borderPane.setCenter(gridPane);
-        
+
         Image image = new Image(new FileInputStream("image\\tictactoeBack.png"));
         borderPane.setBackground(new Background(new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
+        System.out.println("boolean computer is " + computer);
         if (!computer) {
             start();
         }
@@ -184,8 +202,8 @@ public class Main implements TicTacToeConstants {
                     myToken = Nut.X;
                     otherToken = Nut.O;
                     Platform.runLater(() -> {
-                        lblTitle.setText("Player 1 with token 'X'");
-                        lblStatus.setText("Waiting for player 2 to join");
+                        lblTitle.setText(namePlayer1);
+                        lblStatus.setText("Waiting for " + namePlayer2.trim() + " to join");
                     });
 
                     // Receive startup notification from the server
@@ -193,16 +211,19 @@ public class Main implements TicTacToeConstants {
 
                     // The other player has joined
                     Platform.runLater(()
-                            -> lblStatus.setText("Player 2 has joined. I start first"));
+                            -> lblStatus.setText(namePlayer2.trim() + " has joined. I start first"));
 
                     // It is my turn
                     myTurn = true;
                 } else if (player == PLAYER2) {
+                    String str = namePlayer1;
+                    namePlayer1 = namePlayer2;
+                    namePlayer2 = str;
                     myToken = Nut.O;
                     otherToken = Nut.X;
                     Platform.runLater(() -> {
-                        lblTitle.setText("Player 2 with token 'O'");
-                        lblStatus.setText("Waiting for player 1 to move");
+                        lblTitle.setText(namePlayer2.trim());
+                        lblStatus.setText("Waiting for " + namePlayer1.trim() + " to move");
                     });
                 }
 
@@ -255,28 +276,39 @@ public class Main implements TicTacToeConstants {
             continueToPlay = false;
             if (myToken == Nut.X) {
                 Platform.runLater(() -> lblStatus.setText("I won! (X)"));
+                new Sql().saveRecord(namePlayer1, namePlayer2, "win");
+                new Sql().saveRecord(namePlayer2, namePlayer1, "lose");
+
             } else if (myToken == Nut.O) {
                 Platform.runLater(()
-                        -> lblStatus.setText("Player 1 (X) has won!"));
+                        -> lblStatus.setText(namePlayer1.trim() + " (X) has won!"));
                 receiveMove();
             }
         } else if (status == PLAYER2_WON) {
+            
+
             // Player 2 won, stop playing
             continueToPlay = false;
             if (myToken == Nut.O) {
                 Platform.runLater(() -> lblStatus.setText("I won! (O)"));
+                new Sql().saveRecord(namePlayer1, namePlayer2, "lose");
+                new Sql().saveRecord(namePlayer2, namePlayer1, "win");
             } else if (myToken == Nut.X) {
                 Platform.runLater(()
-                        -> lblStatus.setText("Player 2 (O) has won!"));
+                        -> lblStatus.setText(namePlayer2.trim() + " (O) has won!"));
                 receiveMove();
             }
         } else if (status == DRAW) {
+            
+
             // No winner, game is over
             continueToPlay = false;
             Platform.runLater(()
                     -> lblStatus.setText("Game is over, no winner!"));
-
+            
             if (myToken == Nut.O) {
+                new Sql().saveRecord(namePlayer1, namePlayer2, "draw");
+                new Sql().saveRecord(namePlayer2, namePlayer1, "draw");
                 receiveMove();
             }
         } else {
@@ -327,11 +359,11 @@ public class Main implements TicTacToeConstants {
             setStroke(Color.BLACK);
             setFill(Color.ALICEBLUE);
             setOnMousePressed((event) -> {
-                if(!computer){
-                Logic.click(this, Main.this);
-                }
-                else
+                if (!computer) {
+                    Logic.click(this, Main.this);
+                } else {
                     Logic.click(this, null);
+                }
                 if (computer) {
                     if (Logic.isFinish() == 2) {
                         new Computer().play();

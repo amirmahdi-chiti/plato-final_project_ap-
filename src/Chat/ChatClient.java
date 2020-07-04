@@ -19,7 +19,10 @@ public class ChatClient {
 
     private ArrayList<UserStatusListener> userStatusListeners = new ArrayList<>();
     private ArrayList<MessageListener> messageListeners = new ArrayList<>();
+    private ArrayList<GameListener> gameListeners = new ArrayList<>();
 
+    
+    
     public ChatClient(String serverName, int serverPort) {
         this.serverName = serverName;
         this.serverPort = serverPort;
@@ -43,6 +46,11 @@ public class ChatClient {
             //client.logoff();
         }
     }
+    }
+     public void sendRequestGame(String sendTo) throws IOException {
+        String cmd = "#GAME# "+  sendTo+"\n";
+         System.out.println("in method sendRequestGame");
+        serverOut.write(cmd.getBytes());
     }
 
     public void msg(String sendTo, String msgBody) throws IOException {
@@ -95,6 +103,8 @@ public class ChatClient {
                     } else if ("msg".equalsIgnoreCase(cmd)) {
                         String[] tokensMsg = StringUtils.split(line, null, 3);
                         handleMessage(tokensMsg);
+                    }else if("game".equalsIgnoreCase(cmd)){
+                        handleGame(tokens);
                     }
                 }
             }
@@ -126,6 +136,7 @@ public class ChatClient {
 
     private void handleOnline(String[] tokens) {
         String login = tokens[1];
+        System.out.println("in handle Online");
         for(UserStatusListener listener : userStatusListeners) {
             listener.online(login);
         }
@@ -159,6 +170,20 @@ public class ChatClient {
 
     public void removeMessageListener(MessageListener listener) {
         messageListeners.remove(listener);
+    }
+     public void addGameListener(GameListener listener) {
+        gameListeners.add(listener);
+    }
+
+    public void removeGameListener(GameListener listener) {
+        gameListeners.remove(listener);
+    }
+
+    private void handleGame(String[] tokens) {
+         String login = tokens[1];
+        for(GameListener listener : gameListeners) {
+            listener.game(login);
+        }
     }
 
 }

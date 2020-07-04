@@ -1,5 +1,6 @@
 package Tic_Tac_Toe;
 
+import Login.Sql;
 import static Tic_Tac_Toe.Computer.opponent;
 
 import static Tic_Tac_Toe.Computer.player;
@@ -17,10 +18,11 @@ import javafx.scene.paint.ImagePattern;
                     && b[row][1].nut == b[row][2].nut) {
                 if (b[row][0].nut.equals(Nut.X)) {
                     Main.text.setText(me + " + is winner");
+                    new Sql().saveRecord(me, "computer", "win");
                     return +1;
                 } else if (b[row][0].nut.equals(Nut.O)) {
                     Main.text.setText("computer is winner");
-
+                    new Sql().saveRecord(me, "computer", "lose");
                     return -1;
                 }
             }
@@ -32,9 +34,11 @@ import javafx.scene.paint.ImagePattern;
                     && b[1][col].nut == b[2][col].nut) {
                 if (b[0][col].nut == Nut.X) {
                     Main.text.setText(me + " + is winner");
+                    new Sql().saveRecord(me, "computer", "win");
                     return +1;
                 } else if (b[0][col].nut == Nut.O) {
                     Main.text.setText("computer is winner");
+                    new Sql().saveRecord(me, "computer", "lose");
                     return -1;
                 }
             }
@@ -44,9 +48,11 @@ import javafx.scene.paint.ImagePattern;
         if (b[0][0].nut != null && b[0][0].nut == b[1][1].nut && b[1][1].nut == b[2][2].nut) {
             if (b[0][0].nut == Nut.X) {
                 Main.text.setText(me + " + is winner");
+                new Sql().saveRecord(me, "computer", "win");
                 return +1;
             } else if (b[0][0].nut == Nut.O) {
                 Main.text.setText("computer is winner");
+                new Sql().saveRecord(me, "computer", "lose");
                 return -1;
             }
         }
@@ -54,9 +60,11 @@ import javafx.scene.paint.ImagePattern;
         if (b[1][1].nut != null && b[0][2].nut == b[1][1].nut && b[1][1].nut == b[2][0].nut) {
             if (b[0][2].nut == Nut.X) {
                 Main.text.setText(me + " + is winner");
+                new Sql().saveRecord(me, "computer", "win");
                 return +1;
             } else if (b[0][2].nut == Nut.O) {
                 Main.text.setText("computer is winner");
+                new Sql().saveRecord(me, "computer", "lose");
                 return -1;
             }
         }
@@ -70,6 +78,7 @@ import javafx.scene.paint.ImagePattern;
 
         }
         // Else if none of them have won then return 0
+        new Sql().saveRecord(me, "computer", "draw");
         Main.text.setText("DRAW");
         return 0;
     }

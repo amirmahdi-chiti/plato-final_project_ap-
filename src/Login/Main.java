@@ -30,7 +30,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    static Scene scene;
+    static public  Scene scene;
     private ChatClient client;
     private Stage originalStage;
     @Override
