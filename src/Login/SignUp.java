@@ -2,6 +2,8 @@ package Login;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -104,21 +106,19 @@ public class SignUp {
 
     private static Menu createMenuBar() {
          Menu fileMenu = new Menu("File");
-        MenuItem menuItem1 = new MenuItem("New ...");
-        menuItem1.setOnAction((event) -> {
-//            try {
-//                /original.setScene(createScene1());
-//            } catch (FileNotFoundException ex) {
-//                System.out.println("cannot");
-//            }
-        });
+        MenuItem menuItem1 = new MenuItem("Menu ...");
+        menuItem1.setOnAction(new EventHandler<ActionEvent>() {
+             @Override
+             public void handle(ActionEvent event) {
+                 Main.scene.setRoot(Main.temp);
+             }
+         });
         fileMenu.getItems().add(menuItem1);
-        fileMenu.getItems().add(new MenuItem("Open..."));
         fileMenu.getItems().add(new MenuItem("Setting..."));
         fileMenu.getItems().add(new SeparatorMenuItem());
         MenuItem menuItem = new MenuItem("Exit");
         menuItem.setOnAction((event) -> {
-            //original.close();
+            Main.originalStage.close();
         });
         fileMenu.getItems().add(menuItem);
         return fileMenu;

@@ -70,7 +70,7 @@ public class GamePage {
         });
         tictactoeIcon.setOnMousePressed((event) -> {
             try {
-                Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(true,me,null,null).sceneBuider());
+                Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(true,me,null,null,null).sceneBuider());
             } catch (FileNotFoundException ex) {
                 ex.printStackTrace();
             }

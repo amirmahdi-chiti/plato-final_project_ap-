@@ -1,5 +1,6 @@
 package Tic_Tac_Toe;
 
+import Chat.ChatClient;
 import Login.Sql;
 import static Tic_Tac_Toe.TicTacToeConstants.PLAYER1;
 import java.io.DataInputStream;
@@ -10,10 +11,15 @@ import java.io.IOException;
 import java.net.Socket;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
@@ -26,12 +32,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import Chat.MessageListener;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class Main implements TicTacToeConstants {
+public class Main implements TicTacToeConstants,MessageListener{
 
     static Nut turn = Nut.X;
     static Cell[][] Board = new Cell[3][3];
@@ -54,13 +66,16 @@ public class Main implements TicTacToeConstants {
 
     // Continue to play?
     private boolean continueToPlay = true;
-
+    
+    private ObservableList<String> messageItems;
+    
     Label lblTitle = new Label();
     // Create and initialize a status label
     Label lblStatus = new Label();
 
     // Wait for the player to mark a cell
     private boolean waiting = true;
+    private ChatClient client;
 
     public String getNamePlayer1() {
         return namePlayer1;
@@ -73,7 +88,7 @@ public class Main implements TicTacToeConstants {
     // Host name or ip
     private String host = "localhost";
 
-    public Main(boolean Computer, String login, String player1, String player2) {
+    public Main(boolean Computer, String login, String player1, String player2,ChatClient client) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 Board[i][j] = new Cell(i, j);
@@ -85,11 +100,14 @@ public class Main implements TicTacToeConstants {
         if (!computer) {
             this.namePlayer1 = player1;
             this.namePlayer2 = player2;
+            this.client = client;
+            this.client.addMessageListener(this);
         }
         this.me = login;
         Logic.me = login;
     }
-
+    
+    
     public void setMyTurn(boolean myTurn) {
         this.myTurn = myTurn;
     }
@@ -145,8 +163,57 @@ public class Main implements TicTacToeConstants {
     public Pane sceneBuider() throws FileNotFoundException {
         BorderPane borderPane = new BorderPane();
         GridPane gridPane = new GridPane();
-        VBox hBox = new VBox();
-        borderPane.setTop(hBox);
+        if (!computer) {
+            VBox right = new VBox();
+            HBox hBox = new HBox();
+            right.getChildren().add(hBox);
+            Circle circle = new Circle(50);
+            Circle circle2 = new Circle(50);
+            Circle circle3 = new Circle(50);
+            FileInputStream fileInputStream = null;
+            FileInputStream fileInputStream2 = null;
+            FileInputStream fileInputStream3 = null;
+            if (namePlayer1.equals("amirmahdi") || namePlayer2.equals("amirmahdi")) {
+                fileInputStream = new FileInputStream("image\\amirmahdi2.png");
+            } else {
+                fileInputStream = new FileInputStream("image\\user.png");
+            }
+            fileInputStream2 = new FileInputStream("image\\vs.png");
+            fileInputStream3 = new FileInputStream("image\\user2.png");
+            circle.setFill(new ImagePattern(new Image(fileInputStream)));
+            circle2.setFill(new ImagePattern(new Image(fileInputStream2)));
+            circle3.setFill(new ImagePattern(new Image(fileInputStream3)));
+            hBox.getChildren().addAll(circle, circle2, circle3);
+            ListView<String> messageList = new ListView<String>();
+            messageItems = FXCollections.observableArrayList();
+            messageList.setItems(messageItems);
+            ArrayList<String> message = new Sql().getMessage(namePlayer1, namePlayer2);
+            messageItems.addAll(message);
+            HBox sendBox = new HBox();
+            TextField messageField = new TextField();
+            messageField.setPrefWidth(200);
+            Button button = new Button("send");
+            button.setOnAction((event) -> {
+                String text2 = messageField.getText();
+                try {
+                    client.msg(namePlayer2, text2);
+                    this.messageItems.add(me + ": " + text2);
+                    messageField.setText("");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            });
+            
+            
+            sendBox.getChildren().addAll(messageField, button);
+            right.getChildren().addAll(messageList, sendBox);
+            right.setSpacing(20);
+            right.setAlignment(Pos.CENTER);
+            right.setPadding(new Insets(20));
+            borderPane.setRight(right);
+        }
+        VBox vbox = new VBox();
+        borderPane.setTop(vbox);
         text = new Text();
         text.setFill(Color.WHITE);
         text.setFont(new Font(45));
@@ -154,9 +221,9 @@ public class Main implements TicTacToeConstants {
         lblTitle.setTextFill(Color.WHITE);
         lblStatus.setFont(new Font(30));
         lblTitle.setFont(new Font(30));
-        hBox.getChildren().addAll(lblStatus, lblTitle, text);
-        hBox.setPadding(new Insets(50, 0, 0, 0));
-        hBox.setAlignment(Pos.CENTER);
+        vbox.getChildren().addAll(lblStatus, lblTitle, text);
+        vbox.setPadding(new Insets(50, 0, 0, 0));
+        vbox.setAlignment(Pos.CENTER);
         gridPane.setAlignment(Pos.CENTER);
         for (int i = 0; i < Board.length; i++) {
             for (int j = 0; j < Board.length; j++) {
@@ -285,7 +352,6 @@ public class Main implements TicTacToeConstants {
                 receiveMove();
             }
         } else if (status == PLAYER2_WON) {
-            
 
             // Player 2 won, stop playing
             continueToPlay = false;
@@ -299,13 +365,12 @@ public class Main implements TicTacToeConstants {
                 receiveMove();
             }
         } else if (status == DRAW) {
-            
 
             // No winner, game is over
             continueToPlay = false;
             Platform.runLater(()
                     -> lblStatus.setText("Game is over, no winner!"));
-            
+
             if (myToken == Nut.O) {
                 new Sql().saveRecord(namePlayer1, namePlayer2, "draw");
                 new Sql().saveRecord(namePlayer2, namePlayer1, "draw");
@@ -328,6 +393,13 @@ public class Main implements TicTacToeConstants {
                     Logic.paint(cells[row][column], otherToken);
                 });
 
+    }
+
+    @Override
+    public void onMessage(String fromLogin, String msgBody) {
+        System.out.println("in on message method in Tic Tac Toe main");
+        String line = fromLogin + ": " + msgBody;
+        messageItems.add(line);
     }
 
     class Cell extends Rectangle {

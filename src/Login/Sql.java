@@ -18,8 +18,8 @@ public class Sql {
     Connection conn;
 
     public Sql() {
-        String dbURL = "jdbc:sqlserver://localhost\\SQL2016;databaseName=APFinal";
-        String username = "sa";
+        String dbURL = "jdbc:sqlserver://localhost\\SQLEXPRESS;databaseName=APFinal";
+        String username = "localhost";
         String password = "0902266985";
 
         try {
@@ -73,7 +73,7 @@ public class Sql {
             statement = conn.createStatement();
             result = statement.executeQuery(sql);
             while (result.next()) {
-                if (username.equals(result.getString("username")) && pass.equals(result.getString("password"))) {
+                if (username.equals(result.getString("username").trim()) && pass.equals(result.getString("password").trim())) {
                     return true;
                 }
             }
@@ -153,7 +153,7 @@ public class Sql {
         int rowsInserted = -1;
         PreparedStatement statement = null;
         try {
-            String sql = "INSERT INTO private2(sender,receiver,message) VALUES " + "('" + sender + "','" + reciver + "','"
+            String sql = "INSERT INTO private3(sender,receiver,message) VALUES " + "('" + sender + "','" + reciver + "','"
                     + text + "')";
 
             statement = conn.prepareStatement(sql);
@@ -174,7 +174,7 @@ public class Sql {
 
     public ArrayList<String> getMessage(String sender, String receiver) {
         ArrayList<String> arrayList = new ArrayList<String>();
-        String sql = "SELECT * FROM private2 Where (sender = '" + sender + "' and receiver = '" + receiver + "')or (sender = '" + receiver + "' and receiver = '" + sender + "') ORDER BY ID";
+        String sql = "SELECT * FROM private3 Where (sender = '" + sender + "' and receiver = '" + receiver + "')or (sender = '" + receiver + "' and receiver = '" + sender + "') ORDER BY ID";
 
         Statement statement = null;
         ResultSet result = null;
@@ -300,6 +300,25 @@ public class Sql {
             e.printStackTrace();
         }
         return array;
+    }
+    public boolean searchUser(String username) {
+        String sql = "SELECT * FROM [dbo].[user2]";
+
+        Statement statement = null;
+        ResultSet result = null;
+        try {
+            statement = conn.createStatement();
+            result = statement.executeQuery(sql);
+            while (result.next()) {
+                if (username.equals(result.getString("username").trim())) {
+                    return true;
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println("oops");
+        }
+
+        return false;
     }
 
 }

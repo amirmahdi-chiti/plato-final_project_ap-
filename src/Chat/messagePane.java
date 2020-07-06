@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,8 +57,9 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
     private String login;
     private ObservableList<String> messageItems;
     private ObservableList<String> contactItems;
+    private HashMap<String,ArrayList<String>> messageHash;
     private String me;
-
+    private boolean thisPage = true;
     public messagePane(ChatClient client, String login) {
         this.client = client;
         this.me = login;
@@ -75,12 +77,18 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
         ListView<String> contactList = new ListView<String>();
         messageItems = FXCollections.observableArrayList();
         contactItems = FXCollections.observableArrayList();
+        messageHash = new HashMap();
 
         ArrayList<String> contact = new Sql().getContact(me);
         for (String st : contact) {
             System.out.println("************************");
             System.out.println(Server.ServerMain.server.getServerWorkerList());
             System.out.println("**************************");
+            ArrayList<String> message2 = new Sql().getMessage(me, st);
+            System.out.println("array list message 2 :" + message2);
+            messageHash.put(st.trim(), message2);
+            
+            
          if(Server.ServerMain.server.getServerWorkerList().contains(st))
             contactItems.add(st.trim() + " (Online)");
          else{
@@ -131,10 +139,15 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
         contactList.setOnMousePressed((event) -> {
             login = StringUtils.split(contactList.getSelectionModel().getSelectedItem(), null, 2)[0];
             messageItems.clear();
-            ArrayList<String> message = new Sql().getMessage(me, login);
-            for (String str : message) {
-                messageItems.add(str);
-            }
+           // ArrayList<String> message = new Sql().getMessage(me, login);
+            
+//            for (String str : messageHash.get(login)) {
+//                messageItems.add(str);
+//            }
+            System.out.println("message whit amir" + messageHash.get("amir"));
+            System.out.println(messageHash.get(login));
+
+            messageItems.addAll(messageHash.get(login));
             System.out.println(login);
         });
         contactPane.getChildren().add(contactList);
@@ -181,7 +194,8 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
             public void handle(MouseEvent event) {
                 try {
                     client.sendRequestGame(login);
-                    Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(false, me, me, login).sceneBuider());
+                    thisPage = false;
+                    Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(false, me, me, login,client).sceneBuider());
                 } catch (FileNotFoundException ex) {
                     ex.printStackTrace();
                 } catch (IOException ex) {
@@ -236,17 +250,24 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
 
     @Override
     public void onMessage(String fromLogin, String msgBody) {
+        if(thisPage){
         //  if (login.equalsIgnoreCase(fromLogin)) {
+        
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
 
                 String line = fromLogin + ": " + msgBody;
+                ArrayList<String> get = messageHash.get(fromLogin);
+                get.add(line);
+                messageHash.put(fromLogin, get);
+                if(fromLogin.equals(login))
                 messageItems.add(line);
             }
         });
 
         // }
+        }
     }
 
     @Override
@@ -288,8 +309,9 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.get() == ButtonType.OK) {
                     try {
-                    client.sendRequestGame(login);
-                    Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(false, me, me, login).sceneBuider());
+                    //client.sendRequestGame(login);
+                    thisPage = false;
+                    Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(false, me, login, me,client).sceneBuider());
                     } catch (FileNotFoundException ex) {
                     ex.printStackTrace();
                     } catch (IOException ex) {

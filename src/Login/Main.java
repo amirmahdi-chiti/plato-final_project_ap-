@@ -25,14 +25,16 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-    static public  Scene scene;
+     public static Scene scene;
+     public static Pane temp;
     private ChatClient client;
-    private Stage originalStage;
+    public static Stage originalStage;
     @Override
     public void init() throws Exception {
         super.init(); //To change body of generated methods, choose Tools | Templates.
@@ -128,6 +130,7 @@ public class Main extends Application {
         gridPane1.add(text, 0, 0);
         gridPane1.add(text3, 0, 1);
         gridPane1.add(button, 0, 2);
+        temp = borderPane;
          scene = new Scene(borderPane);
         originalStage.setTitle("Grid Pane Example");
         originalStage.setFullScreen(true);
