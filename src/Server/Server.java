@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server extends Thread{
-    private ArrayList<ServerWorker> serverWorkerList = new ArrayList<ServerWorker>();
+    public  static  ArrayList<ServerWorker> serverWorkerList = new ArrayList<ServerWorker>();
     public Server() {
     }
     @Override

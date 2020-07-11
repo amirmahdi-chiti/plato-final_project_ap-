@@ -320,5 +320,120 @@ public class Sql {
 
         return false;
     }
+    public boolean joinGroup(String group,String user){
+        int rowsInserted = -1;
+        PreparedStatement statement = null;
+        try {
+            String sql = "INSERT INTO memberGroup(groupName,member) VALUES " + "('" + group + "','" + user + "')";
 
+            statement = conn.prepareStatement(sql);
+
+            rowsInserted = statement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+
+        if (rowsInserted > 0) {
+            System.out.println(" join group in sql ...");
+            return true;
+        }
+        return false;
+
+    }
+
+    public boolean  isMember(String group, String user) {
+        String sql = "SELECT * FROM memberGroup where groupName = '"+group+"'";
+
+        Statement statement = null;
+        ResultSet result = null;
+        try {
+            statement = conn.createStatement();
+            result = statement.executeQuery(sql);
+            while (result.next()) {
+                if (user.equals(result.getString("member").trim())) {
+                    return true;
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+
+        return false;
+    }
+    public int saveMessageGroup(String text,String group,String sender){
+        int rowsInserted = -1;
+        PreparedStatement statement = null;
+        try {
+            String sql = "INSERT INTO group2(groupName,sender,message) VALUES " + "('" + group + "','" + sender + "','"
+                    + text + "')";
+
+            statement = conn.prepareStatement(sql);
+
+            rowsInserted = statement.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return -1;
+        }
+
+        if (rowsInserted > 0) {
+            System.out.println(" massage group saved!");
+            return 1;
+        }
+        return -1;
+    }
+    public ArrayList<String> getGroup(String me){
+         ArrayList<String> arrayList = new ArrayList<String>();
+        String sql = "SELECT * FROM memberGroup Where member = '" + me + "'";
+
+        Statement statement = null;
+        ResultSet result = null;
+        try {
+            statement = conn.createStatement();
+            result = statement.executeQuery(sql);
+            while (result.next()) {
+                arrayList.add("#"+result.getString("groupName").trim()+" (group)");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return arrayList;
+    }
+    
+     public ArrayList<String> getMessageGroup(String group){
+        ArrayList<String> arrayList = new ArrayList<String>();
+        String sql = "SELECT * FROM group2 Where (groupName = '" + group +"') ORDER BY ID";
+
+        Statement statement = null;
+        ResultSet result = null;
+        try {
+            statement = conn.createStatement();
+            result = statement.executeQuery(sql);
+            while (result.next()) {
+               String sender = result.getString("sender").trim();
+                arrayList.add(sender + ": " + result.getString("message"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return arrayList;
+    }
+    public ArrayList<String> getMember(String group){
+         ArrayList<String> arrayList = new ArrayList<String>();
+        String sql = "SELECT * FROM memberGroup Where groupName = '" + group + "'";
+
+        Statement statement = null;
+        ResultSet result = null;
+        try {
+            statement = conn.createStatement();
+            result = statement.executeQuery(sql);
+            while (result.next()) {
+                arrayList.add(result.getString("member").trim());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return arrayList;
+    }
 }

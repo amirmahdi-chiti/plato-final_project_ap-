@@ -10,6 +10,7 @@ import java.util.ArrayList;
  * Created by jim on 4/21/17.
  */
 public class ChatClient {
+
     private final String serverName;
     private final int serverPort;
     private Socket socket;
@@ -20,9 +21,8 @@ public class ChatClient {
     private ArrayList<UserStatusListener> userStatusListeners = new ArrayList<>();
     private ArrayList<MessageListener> messageListeners = new ArrayList<>();
     private ArrayList<GameListener> gameListeners = new ArrayList<>();
+    private ArrayList<MessageGroupListener> messageGroupListener = new ArrayList<>();
 
-    
-    
     public ChatClient(String serverName, int serverPort) {
         this.serverName = serverName;
         this.serverPort = serverPort;
@@ -43,13 +43,14 @@ public class ChatClient {
 //                System.err.println("Login failed");
 //            }
 
-            //client.logoff();
+                //client.logoff();
+            }
         }
     }
-    }
-     public void sendRequestGame(String sendTo) throws IOException {
-        String cmd = "#GAME# "+  sendTo+"\n";
-         System.out.println("in method sendRequestGame");
+
+    public void sendRequestGame(String sendTo) throws IOException {
+        String cmd = "#GAME# " + sendTo + "\n";
+        System.out.println("in method sendRequestGame");
         serverOut.write(cmd.getBytes());
     }
 
@@ -79,6 +80,10 @@ public class ChatClient {
         serverOut.write(cmd.getBytes());
     }
 
+//    public void join(String group) throws IOException {
+//        String cmd = "#JOIN# " + group + "\n";
+//        serverOut.write(cmd.getBytes());
+//    }
     private void startMessageReader() {
         Thread t = new Thread() {
             @Override
@@ -101,11 +106,19 @@ public class ChatClient {
                     } else if ("offline".equalsIgnoreCase(cmd)) {
                         handleOffline(tokens);
                     } else if ("msg".equalsIgnoreCase(cmd)) {
-                        String[] tokensMsg = StringUtils.split(line, null, 3);
+                        String[] tokensMsg;
+                        if (StringUtils.split(line, null, 3)[1].charAt(0) == '#') {
+                            tokensMsg = StringUtils.split(line, null, 4);
+                        } else {
+                            tokensMsg = StringUtils.split(line, null, 3);
+                        }
                         handleMessage(tokensMsg);
-                    }else if("game".equalsIgnoreCase(cmd)){
+                    } else if ("game".equalsIgnoreCase(cmd)) {
                         handleGame(tokens);
+                    } else if ("group".equalsIgnoreCase(cmd)) {
+                        //handleGroup(tokens);
                     }
+
                 }
             }
         } catch (Exception ex) {
@@ -120,16 +133,29 @@ public class ChatClient {
 
     private void handleMessage(String[] tokensMsg) {
         String login = tokensMsg[1];
-        String msgBody = tokensMsg[2];
-
-        for(MessageListener listener : messageListeners) {
-            listener.onMessage(login, msgBody);
+        String user;
+        if (login.charAt(0) == '#') {
+            user = tokensMsg[2];
+            String msgBody = tokensMsg[3];
+            System.out.println("in handle message(group) in chat client class ");
+            for (MessageGroupListener listener : messageGroupListener) {
+                int i = 0;
+                System.out.println(i);
+                i++;
+                listener.onMessageGroup(login, user, msgBody);
+            }
+        } else {
+            String msgBody = tokensMsg[2];
+            user = tokensMsg[1];
+            for (MessageListener listener : messageListeners) {
+                listener.onMessage(login, msgBody);
+            }
         }
     }
 
     private void handleOffline(String[] tokens) {
         String login = tokens[1];
-        for(UserStatusListener listener : userStatusListeners) {
+        for (UserStatusListener listener : userStatusListeners) {
             listener.offline(login);
         }
     }
@@ -137,7 +163,7 @@ public class ChatClient {
     private void handleOnline(String[] tokens) {
         String login = tokens[1];
         System.out.println("in handle Online");
-        for(UserStatusListener listener : userStatusListeners) {
+        for (UserStatusListener listener : userStatusListeners) {
             listener.online(login);
         }
     }
@@ -171,7 +197,8 @@ public class ChatClient {
     public void removeMessageListener(MessageListener listener) {
         messageListeners.remove(listener);
     }
-     public void addGameListener(GameListener listener) {
+
+    public void addGameListener(GameListener listener) {
         gameListeners.add(listener);
     }
 
@@ -179,11 +206,21 @@ public class ChatClient {
         gameListeners.remove(listener);
     }
 
+    public void addMessageGroupListener(MessageGroupListener listener) {
+        messageGroupListener.add(listener);
+    }
+
     private void handleGame(String[] tokens) {
-         String login = tokens[1];
-        for(GameListener listener : gameListeners) {
+        String login = tokens[1];
+        for (GameListener listener : gameListeners) {
             listener.game(login);
         }
     }
 
+//    private void handleGroup(String[] tokens) {
+//        String group = tokens[1];
+//        for (GroupListener listener : groupListeners) {
+//            listener.join(group);
+//        }
+//    }
 }

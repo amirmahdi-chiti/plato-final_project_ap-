@@ -68,7 +68,7 @@ public class ServerWorker extends Thread {
                     System.out.println("handle message in serverWorker class");
                     handleMessage(tokensMsg);
                 } else if (cmd.equals("#JOIN#")) {
-                    handleJoin(split);
+                    //handleJoin(split);
                 } else if (cmd.equals("#LEAVE#")) {
                     handleLeave(split);
                 } else if (cmd.equals("#GAME#")) {
@@ -116,6 +116,11 @@ public class ServerWorker extends Thread {
                     if (!login.equals(worker.getLogin())) {
                         String msg2 = "online " + worker.getLogin() + "\n";
                         System.out.println("injaaaaaaaaa " + worker.getLogin());
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
                         send(msg2);
                     }
                 }
@@ -139,6 +144,7 @@ public class ServerWorker extends Thread {
         if (login != null) {
             try {
                 outPutStram.write(msg.getBytes());
+                System.out.println("in send method in server worker" + msg);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -152,13 +158,21 @@ public class ServerWorker extends Thread {
         String body = tokensMsg[2];
 
         boolean isTopic = sendTo.charAt(0) == '#';
-
+        int count = 0;
         List<ServerWorker> workerList = server.getServerWorkerList();
         for (ServerWorker worker : workerList) {
             if (isTopic) {
-                if (worker.isMemberOfTopic(sendTo)) {
-                    String outMsg = "msg " + sendTo + ":" + login + " " + body + "\n";
+                System.out.println("chat group in handleMessage method in serverWorker class");
+                System.out.println(sendTo.substring(1) + "*" + worker.getLogin() + "*");
+                if (worker.isMemberOfTopic(sendTo.substring(1), worker.getLogin())&&!worker.getLogin().equals(login)) {
+                    System.out.println(worker.getLogin() + " is member of " + sendTo);
+                    String outMsg = "msg " + sendTo + " " + login + " " + body + "\n";
+                    System.out.println("outmsg is = "+outMsg);
                     worker.send(outMsg);
+                    if (count == 0) {
+                        new Sql().saveMessageGroup(body, sendTo.substring(1), login);
+                    }
+                    count++;
                 }
             } else {
                 if (sendTo.equalsIgnoreCase(worker.getLogin())) {
@@ -173,32 +187,29 @@ public class ServerWorker extends Thread {
         }
     }
 
-    private void handleJoin(String[] split) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     private void handleLeave(String[] split) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private boolean isMemberOfTopic(String sendTo) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private boolean isMemberOfTopic(String group, String user) {
+        boolean bol = new Sql().isMember(group, user);
+        return bol;
     }
 
     private void handleGame(String[] split) {
-         String sendTo = split[1];
-         List<ServerWorker> workerList = server.getServerWorkerList();
-          for (ServerWorker worker : workerList) {
-                
-                if (sendTo.equalsIgnoreCase(worker.getLogin())) {
-                    String outMsg = "game " + login+"\n";
+        String sendTo = split[1];
+        List<ServerWorker> workerList = server.getServerWorkerList();
+        for (ServerWorker worker : workerList) {
 
-                    worker.send(outMsg);
-                    
-                    System.out.println("in handlegame method");
+            if (sendTo.equalsIgnoreCase(worker.getLogin())) {
+                String outMsg = "game " + login + "\n";
 
-                }
-            
+                worker.send(outMsg);
+
+                System.out.println("in handlegame method");
+
+            }
+
         }
 
     }

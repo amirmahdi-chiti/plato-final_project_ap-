@@ -31,17 +31,19 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-     public static Scene scene;
-     public static Pane temp;
+
+    public static Scene scene;
+    public static Pane temp;
     private ChatClient client;
     public static Stage originalStage;
+
     @Override
     public void init() throws Exception {
         super.init(); //To change body of generated methods, choose Tools | Templates.
         this.client = new ChatClient("localhost", Server.ServerMain.PORT);
         client.connect();
     }
-    
+
     @Override
     public void start(Stage stage) {
         originalStage = stage;
@@ -67,15 +69,16 @@ public class Main extends Application {
         button1.setStyle("-fx-background-color: #F66565; ");
         button1.setFont(new Font("arial", 20));
         button1.setTextFill(Color.WHITE);
+        Text text4 = new Text("");
         button1.setOnAction((event) -> {
             try {
                 if (client.login(textField1.getText(), textField2.getText())) {
                     System.out.println("wellcome to chat");
                     //scene.setRoot(new messagePane(client,textField1.getText()).sceneChat());
-                    scene.setRoot(new GamePage(client,textField1.getText()).createGamePage());
-                }
-                else{
+                    scene.setRoot(new GamePage(client, textField1.getText()).createGamePage());
+                } else {
                     System.out.println("im sory ...");
+                    text4.setText("Your Username Or Password Is Incorrect");
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -117,7 +120,11 @@ public class Main extends Application {
         gridPane.setPadding(new Insets(10, 15, 10, 15));
         HBox hBox = new HBox();
         hBox.setSpacing(10);
-        hBox.getChildren().addAll(button1,text5);
+        
+        text4.setStyle("-fx-font: 20 arial;");
+        text4.setFill(Color.WHITE);
+        
+        hBox.getChildren().addAll(button1, text5);
         gridPane.setVgap(10);
         gridPane.setHgap(10);
         gridPane.setAlignment(Pos.CENTER);
@@ -127,12 +134,13 @@ public class Main extends Application {
         gridPane.add(text2, 0, 1);
         gridPane.add(textField2, 1, 1);
         gridPane.add(hBox, 1, 2);
+        gridPane.add(text4, 1, 3);
         gridPane1.add(text, 0, 0);
         gridPane1.add(text3, 0, 1);
         gridPane1.add(button, 0, 2);
         temp = borderPane;
-         scene = new Scene(borderPane);
-        originalStage.setTitle("Grid Pane Example");
+        scene = new Scene(borderPane);
+        originalStage.setTitle("PLATO");
         originalStage.setFullScreen(true);
         originalStage.setScene(scene);
         stage.setOnCloseRequest((event) -> {

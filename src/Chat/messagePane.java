@@ -2,6 +2,9 @@ package Chat;
 
 import Login.Sql;
 import Login.Main;
+import Server.Server;
+import Server.ServerMain;
+import Server.ServerWorker;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,7 +29,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -48,24 +53,27 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.apache.commons.lang3.StringUtils;
 
-public class messagePane implements MessageListener, UserStatusListener, GameListener {
+public class messagePane implements MessageListener, UserStatusListener, GameListener, MessageGroupListener {
 
     private final ChatClient client;
     private String login;
     private ObservableList<String> messageItems;
     private ObservableList<String> contactItems;
-    private HashMap<String,ArrayList<String>> messageHash;
+    private HashMap<String, ArrayList<String>> messageHash;
     private String me;
     private boolean thisPage = true;
+
     public messagePane(ChatClient client, String login) {
         this.client = client;
         this.me = login;
         client.addMessageListener(this);
         client.addGameListener(this);
         client.addUserStatusListener(this);
+        client.addMessageGroupListener(this);
     }
 
     public Pane sceneChat() throws FileNotFoundException {
@@ -82,19 +90,29 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
         ArrayList<String> contact = new Sql().getContact(me);
         for (String st : contact) {
             System.out.println("************************");
-            System.out.println(Server.ServerMain.server.getServerWorkerList());
+            for (ServerWorker server : Server.serverWorkerList) {
+                System.out.println(server.getLogin());
+            }
             System.out.println("**************************");
             ArrayList<String> message2 = new Sql().getMessage(me, st);
             System.out.println("array list message 2 :" + message2);
             messageHash.put(st.trim(), message2);
-            
-            
-         if(Server.ServerMain.server.getServerWorkerList().contains(st))
-            contactItems.add(st.trim() + " (Online)");
-         else{
-             
-            contactItems.add(st.trim() + " (Offline)");
-         }
+
+            if (ServerMain.server.getServerWorkerList().contains(st)) {
+                contactItems.add(st.trim() + " (Online)");
+            } else {
+
+                contactItems.add(st.trim() + " (Offline)");
+            }
+
+        }
+        ArrayList<String> group = new Sql().getGroup(me);
+        for (String groups : group) {
+            contactItems.add(groups);
+            String gr = StringUtils.split(groups, null, 2)[0];
+            System.out.println("gr = " + gr);
+            ArrayList<String> messageGroup = new Sql().getMessageGroup(gr.substring(1));
+            messageHash.put(gr, messageGroup);
         }
 
         messageList.setItems(messageItems);
@@ -136,20 +154,35 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
             }
         });
         contactList.setItems(contactItems);
-        contactList.setOnMousePressed((event) -> {
-            login = StringUtils.split(contactList.getSelectionModel().getSelectedItem(), null, 2)[0];
-            messageItems.clear();
-           // ArrayList<String> message = new Sql().getMessage(me, login);
-            
+        contactList.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+                    if (mouseEvent.getClickCount() == 2) {
+                        MemberGroup memberGroup = new MemberGroup(StringUtils.split(contactList.getSelectionModel().getSelectedItem(), null, 2)[0].substring(1));
+                        try {
+                            memberGroup.start(new Stage());
+                            memberGroup.main(null);
+                        } catch (Exception ex) {
+                            System.out.println("in contactList");
+                        }
+                    } else if (mouseEvent.getClickCount() == 1) {
+                        login = StringUtils.split(contactList.getSelectionModel().getSelectedItem(), null, 2)[0];
+                        messageItems.clear();
+                        // ArrayList<String> message = new Sql().getMessage(me, login);
+
 //            for (String str : messageHash.get(login)) {
 //                messageItems.add(str);
 //            }
-            System.out.println("message whit amir" + messageHash.get("amir"));
-            System.out.println(messageHash.get(login));
-
-            messageItems.addAll(messageHash.get(login));
-            System.out.println(login);
+                        System.out.println(messageHash.get(login));
+                        System.out.println("login =" + login);
+                        System.out.println("messagehash = " + messageHash.get(login));
+                        messageItems.addAll(messageHash.get(login));
+                    }
+                }
+            }
         });
+
         contactPane.getChildren().add(contactList);
         contactPane.setFillWidth(true);
 
@@ -171,6 +204,43 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
         username.setFill(Color.rgb(215, 23, 23));
         Rectangle rectangleContact = new Rectangle(90, 70);
         rectangleContact.setFill(new ImagePattern(new Image(new FileInputStream("image\\contact.png"))));
+
+        Rectangle rectangleAddContact = new Rectangle(90, 70);
+        rectangleAddContact.setFill(new ImagePattern(new Image(new FileInputStream("image\\addContact.png"))));
+
+        Rectangle rectangleCreateGroup = new Rectangle(90, 70);
+        rectangleCreateGroup.setFill(new ImagePattern(new Image(new FileInputStream("image\\createGroup.png"))));
+        rectangleCreateGroup.setOnMousePressed((event) -> {
+            TextInputDialog dialog = new TextInputDialog("");
+            dialog.setTitle("Group ");
+
+            dialog.setContentText("Please enter a group name:");
+
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                if (new Sql().joinGroup(result.get(), me)) {
+                    contactItems.add("#" + result.get() + " (group)");
+                }
+            }
+        });
+
+        rectangleAddContact.setOnMousePressed((event) -> {
+            TextInputDialog dialog = new TextInputDialog("");
+            dialog.setTitle("Add Contact");
+
+            dialog.setContentText("Please enter username:");
+
+            Optional<String> result = dialog.showAndWait();
+            if (result.isPresent()) {
+                if (new Sql().searchUser(result.get())) {
+                    contactItems.add(result.get() + " (Online)");
+                    new Sql().addcontact(me, result.get());
+                }
+            }
+        });
+        HBox hBox = new HBox(rectangleContact, rectangleAddContact, rectangleCreateGroup);
+        hBox.setSpacing(15);
+
         vBox1.setAlignment(Pos.CENTER);
         vBox1.setSpacing(30);
         vBox1.setPadding(new Insets(25));
@@ -195,7 +265,7 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
                 try {
                     client.sendRequestGame(login);
                     thisPage = false;
-                    Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(false, me, me, login,client).sceneBuider());
+                    Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(false, me, me, login, client).sceneBuider());
                 } catch (FileNotFoundException ex) {
                     ex.printStackTrace();
                 } catch (IOException ex) {
@@ -205,17 +275,17 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
 
         });
         resultIcon.setOnMousePressed((event) -> {
-           int[] arr = new int[6];
-                 arr =  new Sql().getRecord(me);
-                 messageItems.add("Number of wins from friends = "+ arr[0]);
-                 messageItems.add("Number of lose from friends = "+ arr[2]);
-                 messageItems.add("Number of draw with friends = "+ arr[1]);
-                 messageItems.add("Number of wins from computer = "+ arr[3]);
-                 messageItems.add("Number of lose from computer = "+ arr[5]);
-                 messageItems.add("Number of draw whit computer = "+ arr[4]);
+            int[] arr = new int[6];
+            arr = new Sql().getRecord(me);
+            messageItems.add("Number of wins from friends = " + arr[0]);
+            messageItems.add("Number of lose from friends = " + arr[2]);
+            messageItems.add("Number of draw with friends = " + arr[1]);
+            messageItems.add("Number of wins from computer = " + arr[3]);
+            messageItems.add("Number of lose from computer = " + arr[5]);
+            messageItems.add("Number of draw whit computer = " + arr[4]);
         });
 
-        gameBox.getChildren().addAll(ludoIcon, TicTacToeIcon,resultIcon);
+        gameBox.getChildren().addAll(ludoIcon, TicTacToeIcon, resultIcon);
 
         borderPane.setRight(gameBox);
 
@@ -230,7 +300,11 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
             try {
                 String text = messageField.getText();
                 client.msg(login, text);
-                this.messageItems.add(me + ": " + text);
+                String line = me + ": " + text;
+                ArrayList<String> get = messageHash.get(login);
+                get.add(line);
+                messageHash.put(login, get);
+                this.messageItems.add(line);
                 messageField.setText("");
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -243,35 +317,37 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
         sendBox.setAlignment(Pos.CENTER);
 
         borderPane.setCenter(borderPane1);
-        vBox.getChildren().addAll(vBox1, rectangleContact, contactPane);
+        vBox.getChildren().addAll(vBox1, hBox, contactPane);
 
         return borderPane;
     }
 
     @Override
     public void onMessage(String fromLogin, String msgBody) {
-        if(thisPage){
-        //  if (login.equalsIgnoreCase(fromLogin)) {
-        
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+        if (thisPage) {
+            //  if (login.equalsIgnoreCase(fromLogin)) {
 
-                String line = fromLogin + ": " + msgBody;
-                ArrayList<String> get = messageHash.get(fromLogin);
-                get.add(line);
-                messageHash.put(fromLogin, get);
-                if(fromLogin.equals(login))
-                messageItems.add(line);
-            }
-        });
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
 
-        // }
+                    String line = fromLogin + ": " + msgBody;
+                    ArrayList<String> get = messageHash.get(fromLogin);
+                    get.add(line);
+                    messageHash.put(fromLogin, get);
+                    if (fromLogin.equals(login)) {
+                        messageItems.add(line);
+                    }
+                }
+            });
+
+            // }
         }
     }
 
     @Override
     public void online(String login) {
+        System.out.println(login);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -298,7 +374,7 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
     public void game(String login) {
         System.out.println("in game metod in message pane");
         Platform.runLater(new Runnable() {
-            
+
             @Override
             public void run() {
                 Alert alert = new Alert(AlertType.CONFIRMATION);
@@ -309,13 +385,13 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.get() == ButtonType.OK) {
                     try {
-                    //client.sendRequestGame(login);
-                    thisPage = false;
-                    Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(false, me, login, me,client).sceneBuider());
+                        //client.sendRequestGame(login);
+                        thisPage = false;
+                        Login.Main.scene.setRoot(new Tic_Tac_Toe.Main(false, me, login, me, client).sceneBuider());
                     } catch (FileNotFoundException ex) {
-                    ex.printStackTrace();
+                        ex.printStackTrace();
                     } catch (IOException ex) {
-                    ex.printStackTrace();
+                        ex.printStackTrace();
                     }
                 } else {
                     System.out.println("no i dont want");
@@ -324,5 +400,35 @@ public class messagePane implements MessageListener, UserStatusListener, GameLis
 
         });
 
+    }
+
+//    @Override
+//    public void join(String group) {
+//        contactItems.add("#"+group);
+//    }
+    @Override
+    public void onMessageGroup(String group, String fromLogin, String msgBody) {
+        // if (thisPage) {
+        //  if (login.equalsIgnoreCase(fromLogin)) {
+        System.out.println("in onMessageGroup method");
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("in onMessageGroup method");
+                String line = fromLogin + ": " + msgBody;
+                System.out.println("in messagegroup" + group + "*");
+                ArrayList<String> get = messageHash.get(group);
+                get.add(line);
+                System.out.println(get);
+                messageHash.put(group, get);
+                if (group.equals(login)) {
+                    messageItems.add(line);
+                }
+            }
+        });
+
+        // }
+        //}
     }
 }
